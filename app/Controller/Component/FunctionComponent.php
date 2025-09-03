@@ -24,6 +24,8 @@ class FunctionComponent extends Component{
             }
         }
 
+        var_dump("connect");
+
         return $conn;
     }
 
