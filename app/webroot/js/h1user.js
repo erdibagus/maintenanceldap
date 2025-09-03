@@ -1,0 +1,195 @@
+$(document).ready(function(){
+getGroup()
+})
+function getGroup(){
+  $.ajax({
+        url:"groups/getData",
+        success:function(result){
+            result = JSON.parse(result)
+            // console.log(result)
+            if (result.count > 0) {
+              let rows = "<option value=''>--Pilih--</option>";
+
+              for (let i = 0; i < result.count; i++) {
+                  if((result[i]?.ou?.[0] ?? "") === 'Policies') continue
+                  rows += "<option value='" + (result[i]?.ou?.[0] ?? "") + "'>" + (result[i]?.ou?.[0] ?? "") + "</option>";
+              }
+
+              $('.ou, .formOu').html(rows);
+          } else {
+              $('.ou').html("<option>--Tidak ada data--</option>");
+          }
+        }
+    })
+}
+function getData(mode,ouSave){
+  let ou = $('.ou').val()
+  const nama = $('.filterNama').val()
+
+  if(mode == 1){
+    ou = ouSave
+  } else {
+    if (!ou) return toastMixin.fire({
+                      icon: 'warning',
+                      title: 'Pilih OU.'
+                  });
+  }
+
+  $.ajax({
+        url:"users/getData",
+        type:"POST",
+        data: ({
+          ou: ou,
+          nama:nama
+        }),
+        success:function(result){
+            // console.log(result)
+            result = JSON.parse(result)
+            console.log(result)
+            if (result.count > 0) {
+                // console.log(result.count === 1 && !(result[0]?.uid?.[0] ?? ""))
+                if (result.count === 1 && !(result[0]?.uid?.[0] ?? "")){
+                  return $('#tableuser').children('tbody:first').html('<tr><td colspan="10" class="text-center"><div class="alert alert-important" role="alert"><strong>Data kosong</strong></div></td></tr>');
+                }
+                let rows = "";
+
+                const ou = (result[0]?.ou?.[0] ?? "")
+
+                for (let i = 0; i < result.count; i++) {
+                    if (!(result[i]?.uid?.[0] ?? "")) continue
+                    rows += "<tr>";
+                    rows += "<td>" + (result[i]?.dn ?? "") + "</td>";
+                    rows += "<td>" + (result[i]?.uid?.[0] ?? "") + "</td>";
+                    rows += "<td>" + (result[i]?.cn?.[0] ?? "") + "</td>";
+                    rows += "<td>" + (result[i]?.sn?.[0] ?? "") + "</td>";
+                    rows += "<td>" + (result[i]?.mail?.[0] ?? "") + "</td>";
+                    rows += `<td><button data-ou='${ou}' data-id='${result[i]?.uid?.[0] ?? ""}' data-username='${result[i]?.cn?.[0] ?? ""}' data-nama='${result[i]?.sn?.[0] ?? ""}' data-email='${result[i]?.mail?.[0] ?? ""}' onclick='edit(this)' class='btn btn-1'>Edit</button>
+                                <button class='btn btn-1' onclick='btnHapus("${result[i]?.sn?.[0] ?? ""}","${result[i]?.uid?.[0] ?? ""}","${ou}")'>Hapus</button>
+                              </td>`;
+                    rows += "</tr>";
+                }
+
+                $('#tableuser').children('tbody:first').html(rows);
+            } else {
+                $('#tableuser').children('tbody:first').html('<tr><td colspan="10" class="text-center"><div class="alert alert-important" role="alert"><strong>Data kosong</strong></div></td></tr>');
+            }
+        }
+    })
+}
+
+function btnHapus(nama,uid,ou){
+  $('.btnDel').removeAttr('onclick');
+  $('.btnDel').attr('onclick', `hapus('${uid}','${ou}')`);
+  $('.namaHapus').text(nama)
+  $('#modal-delete').modal('show');
+}
+
+function hapus(uid,ou){
+  $.ajax({
+        url:"users/hapus",
+        type:"POST",
+        data: ({
+          uid: uid,
+          ou: ou,
+        }),
+        success:function(result){
+          console.log(result)
+          if(result == 'sukses'){
+            toastMixin.fire({
+                icon: 'success',
+                title: 'Data berhasil dihapus.'
+            });
+          }else{
+            toastMixin.fire({
+                icon: 'error',
+                title: 'Data gagal dihapus.'
+            });
+          }
+
+          getData(1,ou)
+        }
+    })
+}
+
+function save(mode){
+  const idLama = $('.idLama').val()
+  const id = $('.id').val()
+  const nama = $('.nama').val()
+  const username = $('.username').val()
+  const password = $('.password').val()
+  const email = $('.email').val()
+  const ouLama = $('.ou').val()
+  const ou = $('.formOu').val()
+
+  const url = mode === 1 ? "users/ubah" : "users/tambah";
+
+  $.ajax({
+        url:url,
+        type:"POST",
+        data: ({
+              idLama: idLama,
+              id: id,
+              nama: nama,
+              username: username,
+              password: password,
+              email:email,
+              ouLama:ouLama,
+              ou:ou
+        }),
+        success:function(result){
+          console.log(result)
+          if(result == 'sukses'){
+            toastMixin.fire({
+                icon: 'success',
+                title: 'Data berhasih disimpan.'
+            });
+          }else{
+            toastMixin.fire({
+                icon: 'error',
+                title: 'Data gagal disimpan.'
+            });
+          }
+          $("#modaladd").modal('hide');
+          getData(1,ou)
+        }
+    })
+}
+
+function edit(el) {
+    $('.btnSave').removeAttr('onclick');
+    $('.btnSave').attr('onclick', 'save(1)');
+
+    let $btn = $(el);
+
+    let id       = $btn.data("id");
+    let username = $btn.data("username");
+    let nama     = $btn.data("nama");
+    let email    = $btn.data("email");
+    let ou    = $btn.data("ou");
+
+    // Isi ke form edit
+    $(".idLama").val(id);
+    $(".id").val(id);
+    $(".username").val(username);
+    $(".nama").val(nama);
+    $(".email").val(email);
+    $(".ou, .formOu").val(ou);
+
+    $('.password').val('')
+    $('.modal-title').text('Ubah User')
+    $("#modaladd").modal('show');
+}
+
+function tambah(){
+  $('.btnSave').removeAttr('onclick');
+  $('.btnSave').attr('onclick', 'save(2)');
+
+  $('.id').val('')
+  $('.nama').val('')
+  $('.username').val('')
+  $('.password').val('')
+  $('.email').val('')
+  $('.formOu').val('')
+  $('.modal-title').text('Tambah User')
+}
+

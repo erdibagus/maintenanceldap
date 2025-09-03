@@ -1,0 +1,40 @@
+[04-Dec-2024 07:38:06 UTC] PHP Fatal error:  Uncaught Error: Unknown named parameter $subject in /home/uyuzquz5/public_html/rekap/lib/Cake/Utility/ObjectCollection.php:129
+Stack trace:
+#0 /home/uyuzquz5/public_html/rekap/lib/Cake/Event/CakeEventManager.php(243): ObjectCollection->trigger()
+#1 /home/uyuzquz5/public_html/rekap/lib/Cake/Controller/Controller.php(677): CakeEventManager->dispatch()
+#2 /home/uyuzquz5/public_html/rekap/lib/Cake/Error/ExceptionRenderer.php(158): Controller->startupProcess()
+#3 /home/uyuzquz5/public_html/rekap/lib/Cake/Error/ExceptionRenderer.php(95): ExceptionRenderer->_getController()
+#4 /home/uyuzquz5/public_html/rekap/lib/Cake/Error/ErrorHandler.php(126): ExceptionRenderer->__construct()
+#5 [internal function]: ErrorHandler::handleException()
+#6 {main}
+  thrown in /home/uyuzquz5/public_html/rekap/lib/Cake/Utility/ObjectCollection.php on line 129
+[04-Dec-2024 07:38:26 UTC] PHP Fatal error:  Uncaught Error: Unknown named parameter $subject in /home/uyuzquz5/public_html/rekap/lib/Cake/Utility/ObjectCollection.php:129
+Stack trace:
+#0 /home/uyuzquz5/public_html/rekap/lib/Cake/Event/CakeEventManager.php(243): ObjectCollection->trigger()
+#1 /home/uyuzquz5/public_html/rekap/lib/Cake/Controller/Controller.php(677): CakeEventManager->dispatch()
+#2 /home/uyuzquz5/public_html/rekap/lib/Cake/Error/ExceptionRenderer.php(158): Controller->startupProcess()
+#3 /home/uyuzquz5/public_html/rekap/lib/Cake/Error/ExceptionRenderer.php(95): ExceptionRenderer->_getController()
+#4 /home/uyuzquz5/public_html/rekap/lib/Cake/Error/ErrorHandler.php(126): ExceptionRenderer->__construct()
+#5 [internal function]: ErrorHandler::handleException()
+#6 {main}
+  thrown in /home/uyuzquz5/public_html/rekap/lib/Cake/Utility/ObjectCollection.php on line 129
+[04-Dec-2024 07:40:04 UTC] PHP Fatal error:  Uncaught Error: Unknown named parameter $subject in /home/uyuzquz5/public_html/rekap/lib/Cake/Utility/ObjectCollection.php:129
+Stack trace:
+#0 /home/uyuzquz5/public_html/rekap/lib/Cake/Event/CakeEventManager.php(243): ObjectCollection->trigger()
+#1 /home/uyuzquz5/public_html/rekap/lib/Cake/Controller/Controller.php(677): CakeEventManager->dispatch()
+#2 /home/uyuzquz5/public_html/rekap/lib/Cake/Error/ExceptionRenderer.php(158): Controller->startupProcess()
+#3 /home/uyuzquz5/public_html/rekap/lib/Cake/Error/ExceptionRenderer.php(95): ExceptionRenderer->_getController()
+#4 /home/uyuzquz5/public_html/rekap/lib/Cake/Error/ErrorHandler.php(126): ExceptionRenderer->__construct()
+#5 [internal function]: ErrorHandler::handleException()
+#6 {main}
+  thrown in /home/uyuzquz5/public_html/rekap/lib/Cake/Utility/ObjectCollection.php on line 129
+[04-Dec-2024 07:40:07 UTC] PHP Fatal error:  Uncaught Error: Unknown named parameter $subject in /home/uyuzquz5/public_html/rekap/lib/Cake/Utility/ObjectCollection.php:129
+Stack trace:
+#0 /home/uyuzquz5/public_html/rekap/lib/Cake/Event/CakeEventManager.php(243): ObjectCollection->trigger()
+#1 /home/uyuzquz5/public_html/rekap/lib/Cake/Controller/Controller.php(677): CakeEventManager->dispatch()
+#2 /home/uyuzquz5/public_html/rekap/lib/Cake/Error/ExceptionRenderer.php(158): Controller->startupProcess()
+#3 /home/uyuzquz5/public_html/rekap/lib/Cake/Error/ExceptionRenderer.php(95): ExceptionRenderer->_getController()
+#4 /home/uyuzquz5/public_html/rekap/lib/Cake/Error/ErrorHandler.php(126): ExceptionRenderer->__construct()
+#5 [internal function]: ErrorHandler::handleException()
+#6 {main}
+  thrown in /home/uyuzquz5/public_html/rekap/lib/Cake/Utility/ObjectCollection.php on line 129

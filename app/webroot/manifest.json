@@ -1,0 +1,21 @@
+{
+    "name": "BNPwifi",
+    "short_name": "BNPwifi",
+    "start_url": ".",
+    "display": "standalone",
+    "background_color": "#ffffff",
+    "theme_color": "#2F4F4F",
+    "icons": [
+      {
+        "src": "img/bnpwifi.png",
+        "type": "image/png",
+        "sizes": "192x192"
+      },
+      {
+        "src": "img/bnpwifi.png",
+        "type": "image/png",
+        "sizes": "512x512"
+      }
+    ]
+  }
+  
