@@ -11,7 +11,7 @@ function getGroup(){
               let rows = "<option value=''>--Pilih--</option>";
 
               for (let i = 0; i < result.count; i++) {
-                  if((result[i]?.ou?.[0] ?? "") === 'Policies') continue
+                  if((result[i]?.ou?.[0] ?? "") === 'policies') continue
                   rows += "<option value='" + (result[i]?.ou?.[0] ?? "") + "'>" + (result[i]?.ou?.[0] ?? "") + "</option>";
               }
 

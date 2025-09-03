@@ -37,6 +37,8 @@ class GroupsController extends AppController{
     public function hapus() {
         $this->autoRender = false;
 
+        // var_dump($_POST);exit();
+
         $ou = $_POST['nama'] ?? null;
 
         if (!$ou) {
@@ -48,7 +50,8 @@ class GroupsController extends AppController{
             $conn = $this->Function->ldapConnect(true);
 
             // DN OU yang mau dihapus
-            $dn = "ou=$ou,".$this->baseDn;
+            $dn = "ou=$ou,".$this->Function->ldapConfig['base_dn'];
+            // var_dump($dn);exit();
 
             if (ldap_delete($conn, $dn)) {
                 echo "sukses";
@@ -71,7 +74,7 @@ class GroupsController extends AppController{
 
         try {
             $conn = $this->Function->ldapConnect(true);
-            $dn = "ou=$ou," . $this->baseDn;
+            $dn = "ou=$ou," . $this->Function->ldapConfig['base_dn'];
             $entry = [
                 "ou" => $ou,
                 "objectClass" => ["organizationalUnit", "top"],
@@ -106,13 +109,13 @@ class GroupsController extends AppController{
             $conn = $this->Function->ldapConnect(true);
 
             // DN OU lama
-            $dn = "ou=$ouLama,dc=bagus,dc=local";
+            $dn = "ou=$ouLama,". $this->Function->ldapConfig['base_dn'];
 
             // RDN baru
             $newrdn = "ou=$ouBaru";
 
             // parent tetap sama
-            $newparent = "dc=bagus,dc=local";
+            $newparent = $this->Function->ldapConfig['base_dn'];
 
             if (ldap_rename($conn, $dn, $newrdn, $newparent, true)) {
                 echo "sukses";

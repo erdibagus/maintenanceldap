@@ -2,10 +2,10 @@
 App::uses('Component', 'Controller');
 class FunctionComponent extends Component{
 	public $ldapConfig = [
-        'host' => 'ldap://localhost:7766',
+        'host' => 'ldap://103.123.63.108:7766',
         'port' => null,
         'admin_dn' => 'cn=admin,dc=bernofarm,dc=com',
-        'admin_pass' => 'bernofarm68',
+        'admin_pass' => 'You4tourlah',
         'base_dn' => 'dc=bernofarm,dc=com'
     ];
 
