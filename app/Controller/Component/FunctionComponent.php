@@ -2,15 +2,14 @@
 App::uses('Component', 'Controller');
 class FunctionComponent extends Component{
 	public $ldapConfig = [
-        'host' => 'ldap://localhost',
-        'port' => 7766,
+        'host' => 'ldap://localhost:7766',
+        'port' => null,
         'admin_dn' => 'cn=admin,dc=bernofarm,dc=com',
         'admin_pass' => 'bernofarm68',
         'base_dn' => 'dc=bernofarm,dc=com'
     ];
 
     public function ldapConnect($bindAsAdmin = true) {
-        var_dump("mulai");
         $conn = ldap_connect($this->ldapConfig['host'], $this->ldapConfig['port']);
         if (!$conn) {
             throw new Exception("Tidak bisa konek ke LDAP");
@@ -24,8 +23,6 @@ class FunctionComponent extends Component{
                 throw new Exception("Gagal bind sebagai admin LDAP");
             }
         }
-
-        var_dump("connect");exit();
 
         return $conn;
     }
