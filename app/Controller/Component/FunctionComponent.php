@@ -5,7 +5,7 @@ class FunctionComponent extends Component{
         'host' => 'ldap://localhost',
         'port' => 389,
         'admin_dn' => 'cn=admin,dc=bernofarm,dc=com',
-        'admin_pass' => 'bernofarm',
+        'admin_pass' => 'bernofarm68',
         'base_dn' => 'dc=bernofarm,dc=com'
     ];
 
