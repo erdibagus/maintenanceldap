@@ -2,11 +2,11 @@
 App::uses('Component', 'Controller');
 class FunctionComponent extends Component{
 	public $ldapConfig = [
-        'host' => 'ldap://192.168.0.101',
+        'host' => 'ldap://localhost',
         'port' => 389,
-        'admin_dn' => 'cn=admin,dc=bagus,dc=local',
-        'admin_pass' => 'bagus',
-        'base_dn' => 'dc=bagus,dc=local'
+        'admin_dn' => 'cn=admin,dc=bernofarm,dc=com',
+        'admin_pass' => 'bernofarm',
+        'base_dn' => 'dc=bernofarm,dc=com'
     ];
 
     public function ldapConnect($bindAsAdmin = true) {
@@ -25,6 +25,12 @@ class FunctionComponent extends Component{
         }
 
         return $conn;
+    }
+
+    public function ldapDisconnect($conn) {
+        if ($conn && is_resource($conn)) {
+            ldap_unbind($conn);
+        }
     }
 
 	public function cekOu($username) {
