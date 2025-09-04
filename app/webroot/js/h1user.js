@@ -1,3 +1,4 @@
+let tableDetail
 $(document).ready(function(){
 getGroup()
 })
@@ -45,7 +46,7 @@ function getData(mode,ouSave){
         success:function(result){
             // console.log(result)
             result = JSON.parse(result)
-            console.log(result)
+            // console.log(result)
             if (result.count > 0) {
                 // console.log(result.count === 1 && !(result[0]?.uid?.[0] ?? ""))
                 if (result.count === 1 && !(result[0]?.uid?.[0] ?? "")){
@@ -58,18 +59,28 @@ function getData(mode,ouSave){
                 for (let i = 0; i < result.count; i++) {
                     if (!(result[i]?.uid?.[0] ?? "")) continue
                     rows += "<tr>";
-                    rows += "<td>" + (result[i]?.dn ?? "") + "</td>";
                     rows += "<td>" + (result[i]?.uid?.[0] ?? "") + "</td>";
                     rows += "<td>" + (result[i]?.cn?.[0] ?? "") + "</td>";
-                    rows += "<td>" + (result[i]?.sn?.[0] ?? "") + "</td>";
-                    rows += "<td>" + (result[i]?.mail?.[0] ?? "") + "</td>";
+                    rows += "<td>" + (result[i]?.employeenumber?.[0] ?? "") + "</td>";
+                    rows += "<td>" + (result[i]?.departmentnumber?.[0] ?? "") + "</td>";
+                    rows += "<td>" + (result[i]?.birthdate?.[0] ?? "") + "</td>";
+                    rows += "<td>" + (result[i]?.noktp?.[0] ?? "") + "</td>";
+                    rows += "<td>" + (result[i]?.firstnik?.[0] ?? "") + "</td>";
+                    rows += "<td>" + (result[i]?.lastnik?.[0] ?? "") + "</td>";
+                    rows += "<td>" + (result[i]?.employeetype?.[0] ?? "") + "</td>";
+                    rows += "<td>" + (result[i]?.description?.[0] ?? "") + "</td>";
                     rows += `<td><button data-ou='${ou}' data-id='${result[i]?.uid?.[0] ?? ""}' data-username='${result[i]?.cn?.[0] ?? ""}' data-nama='${result[i]?.sn?.[0] ?? ""}' data-email='${result[i]?.mail?.[0] ?? ""}' onclick='edit(this)' class='btn btn-1'>Edit</button>
                                 <button class='btn btn-1' onclick='btnHapus("${result[i]?.sn?.[0] ?? ""}","${result[i]?.uid?.[0] ?? ""}","${ou}")'>Hapus</button>
                               </td>`;
                     rows += "</tr>";
                 }
+                
+                if(tableDetail !== undefined){
+                    tableDetail.destroy()
+                }
 
                 $('#tableuser').children('tbody:first').html(rows);
+                initDtDetail()
             } else {
                 $('#tableuser').children('tbody:first').html('<tr><td colspan="10" class="text-center"><div class="alert alert-important" role="alert"><strong>Data kosong</strong></div></td></tr>');
             }
@@ -191,5 +202,24 @@ function tambah(){
   $('.email').val('')
   $('.formOu').val('')
   $('.modal-title').text('Tambah User')
+}
+
+function initDtDetail(){
+    tableDetail = $('#tableuser').DataTable({
+        drawCallback: function(settings) {
+            let api = this.api();
+            let rows = api.rows({ filter: 'applied' }).data().length;
+    
+            if (rows === 0) {
+                $('#tableuser tbody').html('<tr><td colspan="13" style="text-align: center;"><div class="alert alert-success" role="alert" style="margin-bottom: 0;"><strong>Data Kosong</strong></div></td></tr>');
+                $('.dataTables_paginate').hide();
+            }else{
+                $('.dataTables_paginate').show();
+            }
+        },
+        // info: false,
+        // lengthChange: false,
+        ordering: false,
+    });
 }
 

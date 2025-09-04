@@ -47,17 +47,22 @@
 					<table id="tableuser" class="table table-vcenter card-table table-hover border">
 						<thead>
 							<tr class="table-dark">
-								<th>DN</th>
 								<th>ID</th>
-								<th>Username</th>
 								<th>Nama</th>
-								<th>Email</th>
+								<th>NIK</th>
+								<th>Divisi</th>
+								<th>Tgl Lahir</th>
+								<th>No. KTP</th>
+								<th>Nik Awal</th>
+								<th>Nik Akhir</th>
+								<th>Status</th>
+								<th>Ket</th>
 								<th></th>
 							</tr>
 						</thead>
 						<tbody>
 							<tr>
-                                <td colspan="10" class="text-center"><div class="alert alert-important" role="alert"><strong>Data kosong</strong></div></td>
+                                <td colspan="20" class="text-center"><div class="alert alert-important" role="alert"><strong>Data kosong</strong></div></td>
                             </tr>
 						</tbody>
 					</table>
@@ -81,7 +86,7 @@
 					<div class="mb-3 row">
 						<label class="col-3 col-form-label required">ID</label>
 						<div class="col">
-							<input type="text" class="form-control id" placeholder="ID">
+							<input disabled type="text" class="form-control id" placeholder="ID">
 						</div>
 					</div>
 					<div class="mb-3 row">
@@ -91,24 +96,52 @@
 						</div>
 					</div>
 					<div class="mb-3 row">
-						<label class="col-3 col-form-label required">Email address</label>
+						<label class="col-3 col-form-label required">Nik</label>
 						<div class="col">
-							<input type="email" class="form-control email" aria-describedby="emailHelp" placeholder="Email">
-							<small class="form-hint">We'll never share your email with anyone else.</small>
+							<input type="text" class="form-control nik" placeholder="Nik">
 						</div>
 					</div>
 					<div class="mb-3 row">
-						<label class="col-3 col-form-label required">Group</label>
+						<label class="col-3 col-form-label required">Divisi</label>
 						<div class="col">
-							<select class="form-select formOu">
-							</select>
+							<input type="text" class="form-control divisi" placeholder="Divisi">
 						</div>
 					</div>
 					<div class="mb-3 row">
-						<label class="col-3 col-form-label required">Username</label>
+						<label class="col-3 col-form-label required">Tgl Lahir</label>
 						<div class="col">
-							<input type="text" class="form-control username" placeholder="Username">
+							<input type="text" class="form-control tglLahir" placeholder="Tgl Lahir">
 						</div>
+					</div>
+					<div class="mb-3 row">
+						<label class="col-3 col-form-label required">No. KTP</label>
+						<div class="col">
+							<input type="text" class="form-control noKtp" placeholder="No. KTP">
+						</div>
+					</div>
+					<div class="mb-3 row">
+						<label class="col-3 col-form-label required">NIK Awal</label>
+						<div class="col">
+							<input type="text" class="form-control nikAwal" placeholder="NIK Awal">
+						</div>
+					</div>
+					<div class="mb-3 row">
+						<label class="col-3 col-form-label required">NIK Akhir</label>
+						<div class="col">
+							<input type="text" class="form-control nikAkhir" placeholder="NIK Akhir">
+						</div>
+					</div>
+					<div class="mb-3 row">
+						<label class="col-3 col-form-label required">Status</label>
+						<div class="col">
+							<input type="text" class="form-control statuss" placeholder="Status">
+						</div>
+					</div>
+					<div class="mb-3">
+						<label class="col-3 col-form-label required">Keterangan</label>
+						<!-- <div class="col"> -->
+							<textarea class="form-control" name="example-textarea-input" rows="4" placeholder="Keterangan"></textarea>
+						<!-- </div> -->
 					</div>
 					<div class="mb-3 row">
 						<div class="col">

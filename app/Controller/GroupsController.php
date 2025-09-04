@@ -28,9 +28,7 @@ class GroupsController extends AppController{
         } catch (Exception $e) {
             echo json_encode(["error" => $e->getMessage()]);
         } finally {
-            if (isset($conn)) {
-                $this->Function->ldapDisconnect($conn);
-            }
+            $this->Function->ldapDisconnect($conn);
         }
     }
 
@@ -61,9 +59,7 @@ class GroupsController extends AppController{
         } catch (Exception $e) {
             echo $e->getMessage();
         } finally {
-            if (isset($conn)) {
-                $this->Function->ldapDisconnect($conn);
-            }
+            $this->Function->ldapDisconnect($conn);
         }
     }
 
@@ -87,9 +83,7 @@ class GroupsController extends AppController{
         } catch (Exception $e) {
             echo $e->getMessage();
         } finally {
-            if (isset($conn)) {
-                $this->Function->ldapDisconnect($conn);
-            }
+            $this->Function->ldapDisconnect($conn);
         }
     }
 
@@ -125,9 +119,7 @@ class GroupsController extends AppController{
         } catch (Exception $e) {
             echo $e->getMessage();
         } finally {
-            if (isset($conn)) {
-                $this->Function->ldapDisconnect($conn);
-            }
+            $this->Function->ldapDisconnect($conn);
         }
     }
 

@@ -8,6 +8,7 @@ class LoginsController extends AppController{
         $user = $_POST['username'] ?? '';
         $pass = $_POST['password'] ?? '';
         $response = [];
+        $conn = null;
 
         try {
             $ou = $this->Function->cekOu($user);
@@ -34,85 +35,101 @@ class LoginsController extends AppController{
                 $response = $this->cekLock($user, $ou);
             }
 
-            ldap_unbind($conn);
-
         } catch (Exception $e) {
+            error_log("LDAP index() error: " . $e->getMessage());
             $response = ["status" => "error", "message" => $e->getMessage()];
+        } finally {
+            $this->Function->ldapDisconnect($conn);
         }
 
         echo json_encode($response);
     }
 
     private function cekLock($username, $ou) {
-        $conn = $this->Function->ldapConnect(true);
-        $user_dn = "uid=$username,ou=$ou," . $this->Function->ldapConfig['base_dn'];
+        $conn = null;
+        try {
+            $conn = $this->Function->ldapConnect(true);
+            $user_dn = "uid=$username,ou=$ou," . $this->Function->ldapConfig['base_dn'];
 
-        $attributes = ['pwdaccountlockedtime'];
-        $result = ldap_read($conn, $user_dn, '(objectClass=*)', $attributes);
-        $entries = ldap_get_entries($conn, $result);
-        ldap_unbind($conn);
+            $attributes = ['pwdaccountlockedtime'];
+            $result = ldap_read($conn, $user_dn, '(objectClass=*)', $attributes);
+            $entries = ldap_get_entries($conn, $result);
 
-        if (!empty($entries[0]['pwdaccountlockedtime'][0])) {
-            $lockedTimeStr = $entries[0]['pwdaccountlockedtime'][0];
-            $datetime = DateTime::createFromFormat('YmdHis\Z', $lockedTimeStr, new DateTimeZone('UTC'));
-            $unlockTimestamp = $datetime->getTimestamp() + 60;
-            $remaining = $unlockTimestamp - time();
+            if (!empty($entries[0]['pwdaccountlockedtime'][0])) {
+                $lockedTimeStr = $entries[0]['pwdaccountlockedtime'][0];
+                $datetime = DateTime::createFromFormat('YmdHis\Z', $lockedTimeStr, new DateTimeZone('UTC'));
+                $unlockTimestamp = $datetime->getTimestamp() + 60;
+                $remaining = $unlockTimestamp - time();
 
-            return [
-                "status" => "locked",
-                "message" => "Password salah 3x, akun terkunci",
-                "remaining_seconds" => $remaining
-            ];
-        } else {
-            return [
-                "status" => "invalid",
-                "message" => "Password salah"
-            ];
+                return [
+                    "status" => "locked",
+                    "message" => "Password salah 3x, akun terkunci",
+                    "remaining_seconds" => $remaining
+                ];
+            } else {
+                return [
+                    "status" => "invalid",
+                    "message" => "Password salah"
+                ];
+            }
+        } catch (Exception $e) {
+            error_log("LDAP cekLock() error [user=$username]: " . $e->getMessage());
+            return ["status" => "error", "message" => $e->getMessage()];
+        } finally {
+            $this->Function->ldapDisconnect($conn);
         }
     }
 
     private function cekExpired($username, $ou, $mode = 0) {
-        $conn = $this->Function->ldapConnect(true);
-        $user_dn = "uid=$username,ou=$ou," . $this->Function->ldapConfig['base_dn'];
+        $conn = null;
+        try {
+            $conn = $this->Function->ldapConnect(true);
+            $user_dn = "uid=$username,ou=$ou," . $this->Function->ldapConfig['base_dn'];
 
-        $result = ldap_read($conn, $user_dn, '(objectClass=*)', ['+']);
-        $entries = ldap_get_entries($conn, $result);
-        ldap_unbind($conn);
+            $result = ldap_read($conn, $user_dn, '(objectClass=*)', ['+']);
+            $entries = ldap_get_entries($conn, $result);
 
-        if (empty($entries[0]['pwdchangedtime'][0])) {
-            return ["status" => "error", "message" => "Atribut pwdChangedTime tidak ditemukan"];
+            if (empty($entries[0]['pwdchangedtime'][0])) {
+                return ["status" => "error", "message" => "Atribut pwdChangedTime tidak ditemukan"];
+            }
+
+            $pwdChangedTime = $entries[0]['pwdchangedtime'][0];
+            $pwdMaxAge = 300; // masa berlaku password (5 menit contoh)
+
+            $datetime = DateTime::createFromFormat('YmdHis\Z', $pwdChangedTime, new DateTimeZone('UTC'));
+            $changedEpoch = $datetime->getTimestamp();
+
+            $expireEpoch = $changedEpoch + $pwdMaxAge;
+            $nowEpoch = time();
+
+            if ($nowEpoch > $expireEpoch) {
+                return ["status" => "expired", "message" => "Password sudah kadaluarsa"];
+            } elseif ($mode !== 0) {
+                $remaining = $expireEpoch - $nowEpoch;
+                return [
+                    "status" => "success",
+                    "message" => "Login berhasil",
+                    "remaining_seconds" => $remaining
+                ];
+            }
+
+            return ["status" => "ok"];
+        } catch (Exception $e) {
+            error_log("LDAP cekExpired() error [user=$username]: " . $e->getMessage());
+            return ["status" => "error", "message" => $e->getMessage()];
+        } finally {
+            $this->Function->ldapDisconnect($conn);
         }
-
-        $pwdChangedTime = $entries[0]['pwdchangedtime'][0];
-        $pwdMaxAge = 300; // masa berlaku password
-
-        $datetime = DateTime::createFromFormat('YmdHis\Z', $pwdChangedTime, new DateTimeZone('UTC'));
-        $changedEpoch = $datetime->getTimestamp();
-
-        $expireEpoch = $changedEpoch + $pwdMaxAge;
-        $nowEpoch = time();
-
-        if ($nowEpoch > $expireEpoch) {
-            return ["status" => "expired", "message" => "Password sudah kadaluarsa"];
-        } elseif ($mode !== 0) {
-            $remaining = $expireEpoch - $nowEpoch;
-            return [
-                "status" => "success",
-                "message" => "Login berhasil",
-                "remaining_seconds" => $remaining
-            ];
-        }
-
-        return ["status" => "ok"];
     }
+
 
     function test(){
         $this->autoRender = false;
-        $ldap_host = "ldap://192.168.0.101"; 
-        $ldap_port = 389;
+        $ldap_host = "ldap://103.123.63.108:7766"; 
+        $ldap_port = null;
 
-        $bind_dn = "uid=bagus123,ou=Jakarta,dc=bagus,dc=local"; 
-        $bind_password = "Gagaso123!3"; 
+        $bind_dn = "uid=1003063,ou=jkt,dc=bagus,dc=local"; 
+        $bind_password = "Bagus123!"; 
 
         $ldap_conn = ldap_connect($ldap_host, $ldap_port) or die("Tidak bisa connect ke LDAP");
 
@@ -147,7 +164,6 @@ class LoginsController extends AppController{
                 $output = [];
                 if ($entries["count"] > 0 && isset($entries[0]["mail"])) {
                     $output["dn"] = $entries[0]["dn"];
-                    $output["mail"] = $entries[0]["mail"][0];
                 }
             }
         } else {

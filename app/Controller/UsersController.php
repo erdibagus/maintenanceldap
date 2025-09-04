@@ -12,37 +12,13 @@ class UsersController extends AppController{
 		// $this->Function->cekSession($this);
 	}
 
-
-    // private function ldapConnect($bindDn = null, $password = null) {
-    //     $conn = ldap_connect($this->ldapHost, $this->ldapPort);
-    //     if (!$conn) {
-    //         throw new Exception("Tidak bisa konek ke LDAP server");
-    //     }
-    //     ldap_set_option($conn, LDAP_OPT_PROTOCOL_VERSION, 3);
-    //     ldap_set_option($conn, LDAP_OPT_REFERRALS, 0);
-
-    //     $bindDn = $bindDn ?? $this->ldapAdminDn;
-    //     $password = $password ?? $this->ldapAdminPass;
-
-    //     if (!@ldap_bind($conn, $bindDn, $password)) {
-    //         throw new Exception("Bind gagal: " . ldap_error($conn));
-    //     }
-    //     return $conn;
-    // }
-
-    // private function ldapDisconnect($conn) {
-    //     if ($conn && is_resource($conn)) {
-    //         ldap_unbind($conn);
-    //     }
-    // }
-
     public function getData($filter = "(objectClass=*)", $attributes = []) {
         $this->autoRender = false;
 
         $ou = $_POST['ou'];
         $nama = $_POST['nama'];
 
-        if($nama) $filter = "(sn=*$nama*)";
+        if($nama) $filter = "(cn=*$nama*)";
 
         try {
             $conn = $this->Function->ldapConnect(true);
@@ -62,9 +38,7 @@ class UsersController extends AppController{
         } catch (Exception $e) {
             echo json_encode(["error" => $e->getMessage()]);
         } finally {
-            if (isset($conn)) {
-                $this->Function->ldapDisconnect($conn);
-            }
+            $this->Function->ldapDisconnect($conn);
         }
     }
 
@@ -85,9 +59,7 @@ class UsersController extends AppController{
         } catch (Exception $e) {
             echo $e->getMessage();
         } finally {
-            if (isset($conn)) {
-                $this->Function->ldapDisconnect($conn);
-            }
+            $this->Function->ldapDisconnect($conn);
         }
     }
 
@@ -122,9 +94,7 @@ class UsersController extends AppController{
         } catch (Exception $e) {
             echo $e->getMessage();
         } finally {
-            if (isset($conn)) {
-                $this->Function->ldapDisconnect($conn);
-            }
+            $this->Function->ldapDisconnect($conn);
         }
     }
 
@@ -163,9 +133,7 @@ class UsersController extends AppController{
         } catch (Exception $e) {
             echo $e->getMessage();
         } finally {
-            if (isset($conn)) {
-                $this->Function->ldapDisconnect($conn);
-            }
+            $this->Function->ldapDisconnect($conn);
         }
     }
 
@@ -189,9 +157,7 @@ class UsersController extends AppController{
         } catch (Exception $e) {
             echo $e->getMessage();
         } finally {
-            if (isset($conn)) {
-                $this->Function->ldapDisconnect($conn);
-            }
+            $this->Function->ldapDisconnect($conn);
         }
     }
 
