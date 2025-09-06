@@ -7,46 +7,103 @@ class LoginsController extends AppController{
 
         $user = $_POST['username'] ?? '';
         $pass = $_POST['password'] ?? '';
-        $response = [];
-        $conn = null;
 
-        try {
-            $ou = $this->Function->cekOu($user);
-            if (!$ou) {
-                $response = ["status" => "error", "message" => "User tidak ditemukan"];
-                echo json_encode($response);
-                return;
-            }
+        $ldap_host = "ldap://103.123.63.108:7766"; 
+        $ldap_port = null;
 
-            $ldapUser = "uid=$user,ou=$ou," . $this->Function->ldapConfig['base_dn'];
-            $conn = $this->Function->ldapConnect(false);
+        // Default response
+        $response = [
+            "status"  => "error",
+            "message" => "Terjadi kesalahan"
+        ];
 
-            // cek expired sebelum bind
-            $expired = $this->cekExpired($user, $ou, 0);
-            if ($expired["status"] === "expired") {
-                echo json_encode($expired);
-                return;
-            }
-
-            // coba bind user
-            if (@ldap_bind($conn, $ldapUser, $pass)) {
-                $response = $this->cekExpired($user, $ou, 1);
-            } else {
-                $response = $this->cekLock($user, $ou);
-            }
-
-        } catch (Exception $e) {
-            error_log("LDAP index() error: " . $e->getMessage());
-            $response = ["status" => "error", "message" => $e->getMessage()];
-        } finally {
-            $this->Function->ldapDisconnect($conn);
+        $ou = $this->Function->cekOu($user);
+        if (!$ou) {
+            $response = ["status" => "error", "message" => "User tidak ditemukan"];
+            $this->sendJson($response);
+            return;
         }
 
-        echo json_encode($response);
+        $expired = $this->cekExpired($user, $ou, 0);
+        if ($expired === "expired") {
+            $response = ["status" => "error", "message" => "Password Expired"];
+            $this->sendJson($response);
+            return;
+        }
+
+        $bind_dn       = "uid=$user,ou=$ou,dc=bernofarm,dc=com"; 
+        $bind_password = "$pass"; 
+
+        $ldap_conn = ldap_connect($ldap_host, $ldap_port) or die("Tidak bisa connect ke LDAP");
+        ldap_set_option($ldap_conn, LDAP_OPT_PROTOCOL_VERSION, 3);
+        ldap_set_option($ldap_conn, LDAP_OPT_REFERRALS, 0);
+
+        if (@ldap_bind($ldap_conn, $bind_dn, $bind_password)) {
+            $filter     = "(objectClass=*)";
+            $attributes = ["uid","cn","departmentnumber","employeenumber","firstnik","lastnik","birthdate"];
+
+            $result = @ldap_read($ldap_conn, $bind_dn, $filter, $attributes);
+
+            if ($result === false) {
+                $err_no  = ldap_errno($ldap_conn);
+                $err_msg = ldap_error($ldap_conn);
+
+                if ($err_no == 49 || stripos($err_msg, "Insufficient access") !== false) {
+                    $response = [
+                        "status"  => "error",
+                        "message" => "Akun harus mengganti password terlebih dahulu sebelum bisa digunakan."
+                    ];
+                } else {
+                    $response = [
+                        "status"  => "error",
+                        "message" => "LDAP Error ($err_no): $err_msg"
+                    ];
+                }
+            } else {
+                $entries = ldap_get_entries($ldap_conn, $result);
+                
+                if ($entries["count"] > 0) {
+                    $response = [
+                        "status"  => "success",
+                        "message" => "Login berhasil",
+                        "data"    => $this->cleanLdapEntry($entries[0])
+                    ];
+                } else {
+                    $response = [
+                        "status"  => "error",
+                        "message" => "Data user tidak ditemukan"
+                    ];
+                }
+            }
+        } else {
+            $lock = $this->cekLock($user, $ou);
+            if ($lock === "locked") {
+                $response = [
+                    "status"  => "error",
+                    "message" => "Akun terkunci"
+                ];
+            } else {
+                $response = [
+                    "status"  => "error",
+                    "message" => "Bind gagal. Username/password salah."
+                ];
+            }
+        }
+
+        ldap_unbind($ldap_conn);
+
+        $this->sendJson($response);
     }
 
+    // Helper untuk output JSON rapi
+    private function sendJson($data) {
+        header("Content-Type: application/json");
+        echo json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+        exit();
+    }
+
+
     private function cekLock($username, $ou) {
-        $conn = null;
         try {
             $conn = $this->Function->ldapConnect(true);
             $user_dn = "uid=$username,ou=$ou," . $this->Function->ldapConfig['base_dn'];
@@ -58,7 +115,7 @@ class LoginsController extends AppController{
             if (!empty($entries[0]['pwdaccountlockedtime'][0])) {
                 $lockedTimeStr = $entries[0]['pwdaccountlockedtime'][0];
                 $datetime = DateTime::createFromFormat('YmdHis\Z', $lockedTimeStr, new DateTimeZone('UTC'));
-                $unlockTimestamp = $datetime->getTimestamp() + 60;
+                $unlockTimestamp = $datetime->getTimestamp() + 300;
                 $remaining = $unlockTimestamp - time();
 
                 return [
@@ -68,8 +125,7 @@ class LoginsController extends AppController{
                 ];
             } else {
                 return [
-                    "status" => "invalid",
-                    "message" => "Password salah"
+                    "status" => "password"
                 ];
             }
         } catch (Exception $e) {
@@ -94,7 +150,7 @@ class LoginsController extends AppController{
             }
 
             $pwdChangedTime = $entries[0]['pwdchangedtime'][0];
-            $pwdMaxAge = 300; // masa berlaku password (5 menit contoh)
+            $pwdMaxAge = 15552000; // masa berlaku password 
 
             $datetime = DateTime::createFromFormat('YmdHis\Z', $pwdChangedTime, new DateTimeZone('UTC'));
             $changedEpoch = $datetime->getTimestamp();
@@ -103,17 +159,10 @@ class LoginsController extends AppController{
             $nowEpoch = time();
 
             if ($nowEpoch > $expireEpoch) {
-                return ["status" => "expired", "message" => "Password sudah kadaluarsa"];
-            } elseif ($mode !== 0) {
-                $remaining = $expireEpoch - $nowEpoch;
-                return [
-                    "status" => "success",
-                    "message" => "Login berhasil",
-                    "remaining_seconds" => $remaining
-                ];
+                return "expired";
             }
 
-            return ["status" => "ok"];
+            return "ok";
         } catch (Exception $e) {
             error_log("LDAP cekExpired() error [user=$username]: " . $e->getMessage());
             return ["status" => "error", "message" => $e->getMessage()];
@@ -122,63 +171,22 @@ class LoginsController extends AppController{
         }
     }
 
+    function cleanLdapEntry($entry) {
+        $result = [];
 
-    function test(){
-        $this->autoRender = false;
-        $ldap_host = "ldap://103.123.63.108:7766"; 
-        $ldap_port = null;
-
-        $bind_dn = "uid=1003063,ou=jkt,dc=bagus,dc=local"; 
-        $bind_password = "Bagus123!"; 
-
-        $ldap_conn = ldap_connect($ldap_host, $ldap_port) or die("Tidak bisa connect ke LDAP");
-
-        ldap_set_option($ldap_conn, LDAP_OPT_PROTOCOL_VERSION, 3);
-        ldap_set_option($ldap_conn, LDAP_OPT_REFERRALS, 0);
-
-        if (@ldap_bind($ldap_conn, $bind_dn, $bind_password)) {
-            $filter = "(objectClass=*)";
-            $attributes = ["mail"];
-
-            $result = @ldap_read($ldap_conn, $bind_dn, $filter, $attributes);
-
-            if ($result === false) {
-                // Ambil error detail
-                $err_no  = ldap_errno($ldap_conn);
-                $err_msg = ldap_error($ldap_conn);
-
-                // Jika masalah karena ppolicy (misalnya password expired / harus ganti password)
-                if ($err_no == 49 || stripos($err_msg, "Insufficient access") !== false) {
-                    $output = [
-                        "error" => true,
-                        "message" => "Akun harus mengganti password terlebih dahulu sebelum bisa digunakan."
-                    ];
+        foreach ($entry as $key => $value) {
+            // Ambil hanya key string, buang key numerik
+            if (is_string($key)) {
+                // Kalau array LDAP, ambil elemen pertama saja
+                if (isset($value['count']) && $value['count'] == 1) {
+                    $result[$key] = $value[0];
                 } else {
-                    $output = [
-                        "error" => true,
-                        "message" => "LDAP Error ($err_no): $err_msg"
-                    ];
-                }
-            } else {
-                $entries = ldap_get_entries($ldap_conn, $result);
-                $output = [];
-                if ($entries["count"] > 0 && isset($entries[0]["mail"])) {
-                    $output["dn"] = $entries[0]["dn"];
+                    $result[$key] = $value;
                 }
             }
-        } else {
-            $output = [
-                "error" => true,
-                "message" => "Bind gagal. Username/password salah atau akun terkunci."
-            ];
         }
 
-        ldap_unbind($ldap_conn);
-
-        // Tampilkan JSON
-        header("Content-Type: application/json");
-        echo json_encode($output, JSON_PRETTY_PRINT);
-
+        return $result;
     }
 }
 	

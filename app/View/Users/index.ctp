@@ -42,22 +42,23 @@
 					</button>
 				</div>
 			</div>
-			<div class="card-body p-0">
+			<div class="card-body">
 				<div class="table-responsive">
 					<table id="tableuser" class="table table-vcenter card-table table-hover border">
 						<thead>
 							<tr class="table-dark">
-								<th>ID</th>
-								<th>Nama</th>
-								<th>NIK</th>
-								<th>Divisi</th>
-								<th>Tgl Lahir</th>
-								<th>No. KTP</th>
-								<th>Nik Awal</th>
-								<th>Nik Akhir</th>
-								<th>Status</th>
-								<th>Ket</th>
-								<th></th>
+								<th style="width:3%">No.</th>
+								<th style="width:10%">ID</th>
+								<th style="width:20%">Nama</th>
+								<th style="width:10%">NIK</th>
+								<th style="width:12%">Divisi</th>
+								<th style="width:10%">Tgl Lahir</th>
+								<!-- <th style="width:5%">No. KTP</th>
+								<th style="width:5%">Nik Awal</th>
+								<th style="width:5%">Nik Akhir</th> -->
+								<th style="width:5%">Status</th>
+								<th style="width:20%">Ket</th>
+								<th style="width:10%"><i class="fa fa-gears"></i></th>
 							</tr>
 						</thead>
 						<tbody>

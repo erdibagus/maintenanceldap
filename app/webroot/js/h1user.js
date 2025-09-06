@@ -1,4 +1,4 @@
-let tableDetail
+let tableData
 $(document).ready(function(){
 getGroup()
 })
@@ -55,28 +55,40 @@ function getData(mode,ouSave){
                 let rows = "";
 
                 const ou = (result[0]?.ou?.[0] ?? "")
-
+                let n = 1
                 for (let i = 0; i < result.count; i++) {
                     if (!(result[i]?.uid?.[0] ?? "")) continue
+                    let str = (result[i]?.birthdate?.[0] ?? "");
+
+                    // ambil bagian tanggal
+                    let year = str.substring(0, 4);
+                    let month = str.substring(4, 6);
+                    let day = str.substring(6, 8);
+
+                    // format ke d-m-y
+                    let tgllahir = `${day}-${month}-${year}`;
+
                     rows += "<tr>";
+                    rows += "<td>" + n + ".</td>";
                     rows += "<td>" + (result[i]?.uid?.[0] ?? "") + "</td>";
                     rows += "<td>" + (result[i]?.cn?.[0] ?? "") + "</td>";
                     rows += "<td>" + (result[i]?.employeenumber?.[0] ?? "") + "</td>";
                     rows += "<td>" + (result[i]?.departmentnumber?.[0] ?? "") + "</td>";
-                    rows += "<td>" + (result[i]?.birthdate?.[0] ?? "") + "</td>";
-                    rows += "<td>" + (result[i]?.noktp?.[0] ?? "") + "</td>";
-                    rows += "<td>" + (result[i]?.firstnik?.[0] ?? "") + "</td>";
-                    rows += "<td>" + (result[i]?.lastnik?.[0] ?? "") + "</td>";
+                    rows += "<td>" + tgllahir + "</td>";
+                    // rows += "<td>" + (result[i]?.noktp?.[0] ?? "") + "</td>";
+                    // rows += "<td>" + (result[i]?.firstnik?.[0] ?? "") + "</td>";
+                    // rows += "<td>" + (result[i]?.lastnik?.[0] ?? "") + "</td>";
                     rows += "<td>" + (result[i]?.employeetype?.[0] ?? "") + "</td>";
                     rows += "<td>" + (result[i]?.description?.[0] ?? "") + "</td>";
-                    rows += `<td><button data-ou='${ou}' data-id='${result[i]?.uid?.[0] ?? ""}' data-username='${result[i]?.cn?.[0] ?? ""}' data-nama='${result[i]?.sn?.[0] ?? ""}' data-email='${result[i]?.mail?.[0] ?? ""}' onclick='edit(this)' class='btn btn-1'>Edit</button>
-                                <button class='btn btn-1' onclick='btnHapus("${result[i]?.sn?.[0] ?? ""}","${result[i]?.uid?.[0] ?? ""}","${ou}")'>Hapus</button>
+                    rows += `<td><button data-ou='${ou}' data-id='${result[i]?.uid?.[0] ?? ""}' data-username='${result[i]?.cn?.[0] ?? ""}' data-nama='${result[i]?.sn?.[0] ?? ""}' data-email='${result[i]?.mail?.[0] ?? ""}' onclick='edit(this)' class='btn btn-1 pt-1 pb-1'>Edit</button>
+                                <button class='btn btn-1 pt-1 pb-1' onclick='btnHapus("${result[i]?.sn?.[0] ?? ""}","${result[i]?.uid?.[0] ?? ""}","${ou}")'>Hapus</button>
                               </td>`;
                     rows += "</tr>";
+                    n++
                 }
                 
-                if(tableDetail !== undefined){
-                    tableDetail.destroy()
+                if(tableData !== undefined){
+                    tableData.destroy()
                 }
 
                 $('#tableuser').children('tbody:first').html(rows);
@@ -205,7 +217,7 @@ function tambah(){
 }
 
 function initDtDetail(){
-    tableDetail = $('#tableuser').DataTable({
+    tableData = $('#tableuser').DataTable({
         drawCallback: function(settings) {
             let api = this.api();
             let rows = api.rows({ filter: 'applied' }).data().length;

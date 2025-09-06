@@ -83,11 +83,11 @@ public function logProcess(){
 	$user=$_POST['username'];
 	$pass=$_POST['password'];
 
-	$ldapServer = "192.168.0.101";
-	$ldapPort = 389; // Port default LDAP
+	$ldapServer = "ldap://103.123.63.108:7766";
+	$ldapPort = null; // Port default LDAP
 	$ou = $this->cekOu($user);
 	// var_dump($ou);exit();
-	$ldapUser = "uid=$user,ou=$ou,dc=bagus,dc=local";
+	$ldapUser = "uid=$user,ou=$ou,dc=bernofarm,dc=com";
 	$ldapPassword = $pass;
 
 	$ldapConn = ldap_connect($ldapServer, $ldapPort) or die("Tidak bisa terhubung ke server LDAP.");
@@ -119,11 +119,11 @@ public function logProcess(){
 
 function cekLock($username, $ou){
 	$this->autoRender = false;
-	$ldap_host = "ldap://192.168.0.101";
-	$ldap_dn = "cn=admin,dc=bagus,dc=local";     
-	$ldap_password = "bagus";          
-	$user_dn = "uid=$username,ou=$ou,dc=bagus,dc=local"; 
-	$lockout_duration = 1000000; 
+	$ldap_host = "ldap://103.123.63.108:7766";
+	$ldap_dn = "cn=admin,dc=bernofarm,dc=com";     
+	$ldap_password = "You4tourlah";          
+	$user_dn = "uid=$username,ou=$ou,dc=bernofarm,dc=com"; 
+	$lockout_duration = 300; 
 	
 
 	$ldap_conn = ldap_connect($ldap_host);
@@ -166,10 +166,10 @@ function cekLock($username, $ou){
 
 function cekOu($username){
 	$this->autoRender = false;
-	$ldap_host = "ldap://192.168.0.101";
-	$ldap_dn   = "cn=admin,dc=bagus,dc=local"; 
-	$ldap_pass = "bagus"; 
-	$base_dn   = "dc=bagus,dc=local";
+	$ldap_host = "ldap://103.123.63.108:7766";
+	$ldap_dn   = "cn=admin,dc=bernofarm,dc=com"; 
+	$ldap_pass = "You4tourlah"; 
+	$base_dn   = "dc=bernofarm,dc=com";
 
 	// koneksi ke server
 	$ldapconn = ldap_connect($ldap_host) or die("Tidak bisa konek ke LDAP");
@@ -207,12 +207,10 @@ function cekOu($username){
 
 function cekExpired($username,$ou,$mode){
 	$this->autoRender = false;
-	$ldap_host = "ldap://192.168.0.101";
-	$ldap_dn = "cn=admin,dc=bagus,dc=local";     
-	$ldap_password = "bagus";          
-	$user_dn = "uid=$username,ou=$ou,dc=bagus,dc=local"; 
-	$lockout_duration = 30; 
-
+	$ldap_host = "ldap://103.123.63.108:7766";
+	$ldap_dn = "cn=admin,dc=bernofarm,dc=com";     
+	$ldap_password = "You4tourlah";          
+	$user_dn = "uid=$username,ou=$ou,dc=bernofarm,dc=com"; 
 
 	$ldap_conn = ldap_connect($ldap_host);
 	ldap_set_option($ldap_conn, LDAP_OPT_PROTOCOL_VERSION, 3);
@@ -233,7 +231,7 @@ function cekExpired($username,$ou,$mode){
 	
 	$pwdChangedTime = $entries[0]['pwdchangedtime'][0]; // format GeneralizedTime LDAP
 
-	$pwdMaxAge = 1000000; // waktu kadaluarsa
+	$pwdMaxAge = 15552000; // 6 bulan dalam detik
 
 	// Konversi pwdChangedTime ke timestamp (epoch)
 	$year   = substr($pwdChangedTime, 0, 4);
@@ -249,19 +247,22 @@ function cekExpired($username,$ou,$mode){
 	$expireEpoch = $changedEpoch + $pwdMaxAge;
 	$nowEpoch    = time(); 
 
-	// var_dump($nowEpoch,$expireEpoch);
-
-	// Bandingkan
 	if ($nowEpoch > $expireEpoch) {
-		echo "expired";exit();
+		echo "expired"; exit();
 	} else {
-		if($mode!=0){
+		if ($mode != 0) {
 			$remaining = $expireEpoch - $nowEpoch;
+
+			$months  = floor($remaining / (30*24*60*60));
+			$days    = floor(($remaining % (30*24*60*60)) / (24*60*60));
+			$hours   = floor(($remaining % (24*60*60)) / 3600);
+			$minutes = floor(($remaining % 3600) / 60);
 			$seconds = $remaining % 60;
-			echo "sukses!$remaining";
+
+			echo "sukses! Sisa waktu: {$months} bulan {$days} hari {$hours} jam {$minutes} menit {$seconds} detik";
 		}
-		
 	}
+
 }
 
 }

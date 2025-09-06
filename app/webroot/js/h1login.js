@@ -53,14 +53,15 @@ function login(){
                     let hours = String(Math.floor(totalSeconds / 3600)).padStart(2, '0');
                     let minutes = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, '0');
                     let seconds = String(totalSeconds % 60).padStart(2, '0');
-                    timer.textContent = ` ${hours}:${minutes}:${seconds}`;
+                    timer.textContent = `${hours}:${minutes}:${seconds}`;
                   }
-                }, 100);
+                }, 1000); // update tiap detik
               },
               willClose: () => {
                 clearInterval(timerInterval);
               }
             });
+
           }else if(result==='password'){
             Swal.fire({
               icon: 'warning',
