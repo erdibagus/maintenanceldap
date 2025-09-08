@@ -50,7 +50,7 @@ class LoginsController extends AppController{
 
         if (@ldap_bind($ldap_conn, $bind_dn, $bind_password)) {
             $filter     = "(objectClass=*)";
-            $attributes = ["uid","cn","departmentnumber","employeenumber","firstnik","lastnik","birthdate","pwdchangedtime"];
+            $attributes = ["uid","cn","departmentnumber","employeenumber","firstnik","lastnik","birthdate","employeetype","pwdchangedtime"];
 
             $result = @ldap_read($ldap_conn, $bind_dn, $filter, $attributes);
 
@@ -73,15 +73,23 @@ class LoginsController extends AppController{
                 $entries = ldap_get_entries($ldap_conn, $result);
                 
                 if ($entries["count"] > 0) {
-                    $pwdChangedTime = $entries[0]['pwdchangedtime'][0];
-                    // var_dump($pwdChangedTime);exit();
-                    $expired = $this->hitungExpired($pwdChangedTime);
-                    $response = [
-                        "status"  => "success",
-                        "message" => "Login berhasil",
-                        "data"    => $this->cleanLdapEntry($entries[0]),
-                        "remaining_expired_second" => $expired["sisa_detik"]
-                    ];
+                    $status = $entries[0]['employeetype'][0];
+                    if($status === "aktif"){
+                        $pwdChangedTime = $entries[0]['pwdchangedtime'][0];
+                        // var_dump($pwdChangedTime);exit();
+                        $expired = $this->hitungExpired($pwdChangedTime);
+                        $response = [
+                            "status"  => "success",
+                            "message" => "Login berhasil",
+                            "data"    => $this->cleanLdapEntry($entries[0]),
+                            "remaining_expired_second" => $expired["sisa_detik"]
+                        ];
+                    }else{
+                        $response = [
+                            "status"  => "error",
+                            "message" => "User tidak aktif"
+                        ]; 
+                    }
                 } else {
                     $response = [
                         "status"  => "error",
@@ -110,7 +118,6 @@ class LoginsController extends AppController{
         $this->sendJson($response);
     }
 
-    // Helper untuk output JSON rapi
     private function sendJson($data) {
         header("Content-Type: application/json");
         echo json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
@@ -213,7 +220,7 @@ class LoginsController extends AppController{
                     ? $entry[$oldKey][0] 
                     : $entry[$oldKey];
 
-                // Khusus tgl_lahir → format ke dd-mm-yyyy
+                // Khusus tgl_lahir 
                 if ($oldKey === "birthdate") {
                     $value = $this->formatTglLahir($value);
                 }
