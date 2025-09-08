@@ -5,6 +5,16 @@ class LoginsController extends AppController{
     function index() {
         $this->autoRender = false;
 
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            http_response_code(405); 
+            header('Content-Type: application/json');
+            echo json_encode([
+                "status" => "error",
+                "message" => "Hanya POST yang diperbolehkan"
+            ]);
+            exit();
+        }
+
         $user = $_POST['username'] ?? '';
         $pass = $_POST['password'] ?? '';
 
@@ -125,7 +135,6 @@ class LoginsController extends AppController{
 
                 return [
                     "status" => "locked",
-                    "message" => "Password salah 5x, akun terkunci",
                     "remaining" => $remaining
                 ];
             } else {
@@ -232,7 +241,7 @@ class LoginsController extends AppController{
         if ($sisaDetik <= 0) {
             return [
                 "status"      => "expired",
-                "sisa_detik"  => $sisaDetik // akan negatif kalau sudah lewat
+                "sisa_detik"  => $sisaDetik 
             ];
         }
 
