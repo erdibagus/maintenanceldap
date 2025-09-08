@@ -40,7 +40,7 @@ class LoginsController extends AppController{
 
         if (@ldap_bind($ldap_conn, $bind_dn, $bind_password)) {
             $filter     = "(objectClass=*)";
-            $attributes = ["uid","cn","departmentnumber","employeenumber","firstnik","lastnik","birthdate"];
+            $attributes = ["uid","cn","departmentnumber","employeenumber","firstnik","lastnik","birthdate","pwdchangedtime"];
 
             $result = @ldap_read($ldap_conn, $bind_dn, $filter, $attributes);
 
@@ -63,10 +63,14 @@ class LoginsController extends AppController{
                 $entries = ldap_get_entries($ldap_conn, $result);
                 
                 if ($entries["count"] > 0) {
+                    $pwdChangedTime = $entries[0]['pwdchangedtime'][0];
+                    // var_dump($pwdChangedTime);exit();
+                    $expired = $this->hitungExpired($pwdChangedTime);
                     $response = [
                         "status"  => "success",
                         "message" => "Login berhasil",
-                        "data"    => $this->cleanLdapEntry($entries[0])
+                        "data"    => $this->cleanLdapEntry($entries[0]),
+                        "remaining_expired_second" => $expired["sisa_detik"]
                     ];
                 } else {
                     $response = [
@@ -77,15 +81,16 @@ class LoginsController extends AppController{
             }
         } else {
             $lock = $this->cekLock($user, $ou);
-            if ($lock === "locked") {
+            if ($lock['status'] === "locked") {
                 $response = [
                     "status"  => "error",
-                    "message" => "Akun terkunci"
+                    "message" => "Password salah 5x, akun terkunci",
+                    "remaining_lock_seconds" => $lock['remaining']
                 ];
             } else {
                 $response = [
                     "status"  => "error",
-                    "message" => "Bind gagal. Username/password salah."
+                    "message" => "Bind gagal. password salah."
                 ];
             }
         }
@@ -120,8 +125,8 @@ class LoginsController extends AppController{
 
                 return [
                     "status" => "locked",
-                    "message" => "Password salah 3x, akun terkunci",
-                    "remaining_seconds" => $remaining
+                    "message" => "Password salah 5x, akun terkunci",
+                    "remaining" => $remaining
                 ];
             } else {
                 return [
@@ -171,23 +176,72 @@ class LoginsController extends AppController{
         }
     }
 
+    function formatTglLahir($ldapDate) {
+        $datetime = DateTime::createFromFormat('YmdHis\Z', $ldapDate, new DateTimeZone('UTC'));
+        if (!$datetime) {
+            return null;
+        }
+        return $datetime->format('d-m-Y');
+    }
+
     function cleanLdapEntry($entry) {
         $result = [];
 
-        foreach ($entry as $key => $value) {
-            // Ambil hanya key string, buang key numerik
-            if (is_string($key)) {
-                // Kalau array LDAP, ambil elemen pertama saja
-                if (isset($value['count']) && $value['count'] == 1) {
-                    $result[$key] = $value[0];
-                } else {
-                    $result[$key] = $value;
+        // Mapping field lama ke baru
+        $map = [
+            "uid"              => "id",
+            "cn"               => "nama",
+            "employeenumber"   => "nik",
+            "departmentnumber" => "divisi",
+            "firstnik"         => "nik_awal",
+            "lastnik"          => "nik_akhir",
+            "birthdate"        => "tgl_lahir"
+        ];
+
+        foreach ($map as $oldKey => $newKey) {
+            if (isset($entry[$oldKey])) {
+                $value = is_array($entry[$oldKey]) && isset($entry[$oldKey][0]) 
+                    ? $entry[$oldKey][0] 
+                    : $entry[$oldKey];
+
+                // Khusus tgl_lahir → format ke dd-mm-yyyy
+                if ($oldKey === "birthdate") {
+                    $value = $this->formatTglLahir($value);
                 }
+
+                $result[$newKey] = $value;
             }
         }
 
         return $result;
     }
+
+    private function hitungExpired($pwdChangedTime, $pwdMaxAge = 15552000) {
+        // Konversi pwdChangedTime ke DateTime
+        $datetime = DateTime::createFromFormat('YmdHis\Z', $pwdChangedTime, new DateTimeZone('UTC'));
+        if (!$datetime) {
+            return ["status" => "error", "message" => "Format pwdChangedTime tidak valid"];
+        }
+
+        $changedEpoch = $datetime->getTimestamp();
+        $expireEpoch  = $changedEpoch + $pwdMaxAge;
+        $nowEpoch     = time();
+
+        $sisaDetik = $expireEpoch - $nowEpoch;
+
+        if ($sisaDetik <= 0) {
+            return [
+                "status"      => "expired",
+                "sisa_detik"  => $sisaDetik // akan negatif kalau sudah lewat
+            ];
+        }
+
+        return [
+            "status"      => "ok",
+            "sisa_detik"  => $sisaDetik
+        ];
+    }
+
 }
 	
 ?>
