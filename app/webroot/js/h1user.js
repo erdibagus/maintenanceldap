@@ -80,8 +80,9 @@ function getData(mode,ouSave){
                     // rows += "<td>" + (result[i]?.lastnik?.[0] ?? "") + "</td>";
                     rows += "<td>" + (result[i]?.employeetype?.[0] ?? "") + "</td>";
                     rows += "<td>" + (result[i]?.description?.[0] ?? "") + "</td>";
-                    rows += `<td><button data-ou='${ou}' data-id='${result[i]?.uid?.[0] ?? ""}' data-username='${result[i]?.cn?.[0] ?? ""}' data-nama='${result[i]?.sn?.[0] ?? ""}' data-email='${result[i]?.mail?.[0] ?? ""}' onclick='edit(this)' class='btn btn-1 pt-1 pb-1'>Edit</button>
-                                <button class='btn btn-1 pt-1 pb-1' onclick='btnHapus("${result[i]?.sn?.[0] ?? ""}","${result[i]?.uid?.[0] ?? ""}","${ou}")'>Hapus</button>
+                    rows += `<td><button data-ou='${ou}' data-id='${result[i]?.uid?.[0] ?? ""}' data-nama='${result[i]?.cn?.[0] ?? ""}' data-nik='${result[i]?.employeenumber?.[0] ?? ""}' data-divisi='${result[i]?.departmentnumber?.[0] ?? ""}'
+                                 data-tgllahir='${tgllahir}' data-ktp='${result[i]?.noktp?.[0] ?? ""}' data-nikawal='${result[i]?.firstnik?.[0] ?? ""}' data-nikakhir='${result[i]?.lastnik?.[0] ?? ""}' data-ket='${result[i]?.description?.[0] ?? ""}' data-status='${result[i]?.employeetype?.[0] ?? ""}' onclick='edit(this)' class='btn btn-1'><i class='fa fa-edit'></i></button>
+                                <button class='btn btn-1' onclick='btnHapus("${result[i]?.sn?.[0] ?? ""}","${result[i]?.uid?.[0] ?? ""}","${ou}")'><i class='fa fa-trash'></i></button>
                               </td>`;
                     rows += "</tr>";
                     n++
@@ -185,18 +186,28 @@ function edit(el) {
     let $btn = $(el);
 
     let id       = $btn.data("id");
-    let username = $btn.data("username");
     let nama     = $btn.data("nama");
-    let email    = $btn.data("email");
-    let ou    = $btn.data("ou");
+    let nik    = $btn.data("nik");
+    let divisi    = $btn.data("divisi");
+    let tgllahir    = $btn.data("tgllahir");
+    let ktp    = $btn.data("ktp");
+    let nikawal    = $btn.data("nikawal");
+    let nikakhir    = $btn.data("nikakhir");
+    let status    = $btn.data("status");
+    let ket    = $btn.data("ket");
 
     // Isi ke form edit
     $(".idLama").val(id);
     $(".id").val(id);
-    $(".username").val(username);
     $(".nama").val(nama);
-    $(".email").val(email);
-    $(".ou, .formOu").val(ou);
+    $(".nik").val(nik);
+    $(".divisi").val(divisi);
+    $(".tgllahir").val(tgllahir);
+    $(".ktp").val(ktp);
+    $(".nikawal").val(nikawal);
+    $(".nikakhir").val(nikakhir);
+    $(".statuss").val(status);
+    $(".ket").val(ket);
 
     $('.password').val('')
     $('.modal-title').text('Ubah User')
@@ -216,22 +227,37 @@ function tambah(){
   $('.modal-title').text('Tambah User')
 }
 
-function initDtDetail(){
+function initDtDetail() {
     tableData = $('#tableuser').DataTable({
+        ordering: false,
+        autoWidth: false, // supaya tidak auto hitung width
+        columnDefs: [
+            { targets: 0, width: "3%", className: "text-center" }, // No.
+            { targets: 1, width: "10%", className: "text-center" },  // ID
+            { targets: 2, width: "20%", className: "text-left" },  // Nama
+            { targets: 3, width: "10%", className: "text-center" },  // NIK
+            { targets: 4, width: "10%", className: "text-center" },  // Divisi
+            { targets: 5, width: "10%", className: "text-center" },// Tgl Lahir
+            { targets: 6, width: "5%", className: "text-center" }, // Status
+            { targets: 7, width: "20%", className: "text-left" },  // Ket
+            { targets: 8, width: "12%", className: "text-center"}  // Action
+        ],
         drawCallback: function(settings) {
             let api = this.api();
             let rows = api.rows({ filter: 'applied' }).data().length;
-    
+
             if (rows === 0) {
-                $('#tableuser tbody').html('<tr><td colspan="13" style="text-align: center;"><div class="alert alert-success" role="alert" style="margin-bottom: 0;"><strong>Data Kosong</strong></div></td></tr>');
+                $('#tableuser tbody').html(
+                    '<tr><td colspan="13" style="text-align: center;">' +
+                    '<div class="alert alert-success" role="alert" style="margin-bottom: 0;">' +
+                    '<strong>Data Kosong</strong></div></td></tr>'
+                );
                 $('.dataTables_paginate').hide();
-            }else{
+            } else {
                 $('.dataTables_paginate').show();
             }
-        },
-        // info: false,
-        // lengthChange: false,
-        ordering: false,
+        }
     });
 }
+
 

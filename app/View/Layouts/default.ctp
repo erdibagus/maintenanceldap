@@ -22,6 +22,9 @@
 ?>
 </head>
 <body>
+	<div id="loading" style="display: none">
+    	<img src="img/loading.gif" alt="Loading...">
+	</div> 
 	<div class="page" style="background: linear-gradient(rgba(255, 255, 255, 0.98), rgba(255,255,255,0.9)), url('img/bg-01.jpg'); 
             background-size: cover; 
             background-position: center;">

@@ -3,3 +3,17 @@
   src: url(../fonts/CenturyGothic.ttf);
 }
 * { font-size: 13.5px;}
+
+#loading {
+  padding: 5px;
+  position: fixed;
+  z-index: 1000;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+}
+
+#loading img {
+  width: 100px; 
+}

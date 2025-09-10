@@ -47,18 +47,18 @@
 					<table id="tableuser" class="table table-vcenter card-table table-hover border">
 						<thead>
 							<tr class="table-dark">
-								<th style="width:3%">No.</th>
-								<th style="width:10%">ID</th>
-								<th style="width:20%">Nama</th>
-								<th style="width:10%">NIK</th>
-								<th style="width:12%">Divisi</th>
-								<th style="width:10%">Tgl Lahir</th>
+								<th>No.</th>
+								<th>ID</th>
+								<th>Nama</th>
+								<th>NIK</th>
+								<th>Divisi</th>
+								<th>Tgl Lahir</th>
 								<!-- <th style="width:5%">No. KTP</th>
 								<th style="width:5%">Nik Awal</th>
 								<th style="width:5%">Nik Akhir</th> -->
-								<th style="width:5%">Status</th>
-								<th style="width:20%">Ket</th>
-								<th style="width:10%"><i class="fa fa-gears"></i></th>
+								<th>Status</th>
+								<th>Ket</th>
+								<th><i class="fa fa-gears"></i></th>
 							</tr>
 						</thead>
 						<tbody>
@@ -81,71 +81,71 @@
 				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 			</div>
 			<div class="modal-body">
-				<div class="card-body">
-					<input type="hidden" class="form-control idLama">
-					<input type="hidden" class="form-control ou">
-					<div class="mb-3 row">
-						<label class="col-3 col-form-label required">ID</label>
-						<div class="col">
-							<input disabled type="text" class="form-control id" placeholder="ID">
+				<div class="row row-cards">
+					<div class="col-md-12">
+						<div class="mb-2">
+							<label class="form-label">ID</label>
+							<input type="text" class="form-control id" disabled placeholder="ID">
 						</div>
 					</div>
-					<div class="mb-3 row">
-						<label class="col-3 col-form-label required">Name</label>
-						<div class="col">
-							<input type="text" class="form-control nama" placeholder="Name">
+					<div class="col-sm-7 col-md-8">
+						<div class="mb-2">
+							<label class="form-label">Nama</label>
+							<input type="text" class="form-control nama" placeholder="Nama">
 						</div>
 					</div>
-					<div class="mb-3 row">
-						<label class="col-3 col-form-label required">Nik</label>
-						<div class="col">
-							<input type="text" class="form-control nik" placeholder="Nik">
+					<div class="col-sm-5 col-md-4">
+						<div class="mb-2">
+							<label class="form-label">NIK</label>
+							<input type="email" class="form-control nik" placeholder="NIK">
 						</div>
 					</div>
-					<div class="mb-3 row">
-						<label class="col-3 col-form-label required">Divisi</label>
-						<div class="col">
+					<div class="col-sm-6 col-md-6">
+						<div class="mb-2">
+							<label class="form-label">Divisi</label>
 							<input type="text" class="form-control divisi" placeholder="Divisi">
 						</div>
 					</div>
-					<div class="mb-3 row">
-						<label class="col-3 col-form-label required">Tgl Lahir</label>
-						<div class="col">
-							<input type="text" class="form-control tglLahir" placeholder="Tgl Lahir">
+					<div class="col-sm-6 col-md-6">
+						<div class="mb-2">
+							<label class="form-label">Tgl Lahir</label>
+							<input type="text" class="form-control tgllahir" placeholder="Tgl Lahir">
 						</div>
 					</div>
-					<div class="mb-3 row">
-						<label class="col-3 col-form-label required">No. KTP</label>
-						<div class="col">
-							<input type="text" class="form-control noKtp" placeholder="No. KTP">
+					<div class="col-md-12">
+						<div class="mb-2">
+							<label class="form-label">No. KTP</label>
+							<input type="text" class="form-control ktp" placeholder="No. KTP">
 						</div>
 					</div>
-					<div class="mb-3 row">
-						<label class="col-3 col-form-label required">NIK Awal</label>
-						<div class="col">
-							<input type="text" class="form-control nikAwal" placeholder="NIK Awal">
+					<div class="col-sm-6 col-md-4">
+						<div class="mb-2">
+							<label class="form-label">NIK Awal</label>
+							<input type="text" class="form-control nikawal" placeholder="NIK Awal">
 						</div>
 					</div>
-					<div class="mb-3 row">
-						<label class="col-3 col-form-label required">NIK Akhir</label>
-						<div class="col">
-							<input type="text" class="form-control nikAkhir" placeholder="NIK Akhir">
+					<div class="col-sm-6 col-md-4">
+						<div class="mb-2">
+							<label class="form-label">NIK Akhir</label>
+							<input type="test" class="form-control nikakhir" placeholder="NIK Akhir">
 						</div>
 					</div>
-					<div class="mb-3 row">
-						<label class="col-3 col-form-label required">Status</label>
-						<div class="col">
-							<input type="text" class="form-control statuss" placeholder="Status">
+					<div class="col-md-4">
+						<div class="mb-2">
+							<label class="form-label">Status</label>
+							<select class="form-control form-select statuss">
+								<option value="aktif">Aktif</option>
+								<option value="nonaktif">Non Aktif</option>
+							</select>
 						</div>
 					</div>
-					<div class="mb-3">
-						<label class="col-3 col-form-label required">Keterangan</label>
-						<!-- <div class="col"> -->
-							<textarea class="form-control" name="example-textarea-input" rows="4" placeholder="Keterangan"></textarea>
-						<!-- </div> -->
+					<div class="col-md-12">
+						<div class="mb-2 mb-0">
+							<label class="form-label">Keterangan</label>
+							<textarea rows="5" class="form-control ket" placeholder="Keterangan"></textarea>
+						</div>
 					</div>
-					<div class="mb-3 row">
-						<div class="col">
+					<div class="col-md-12">
 							<div class="alert alert-warning" role="alert">
 								<div class="d-flex">
 									<div>
@@ -156,16 +156,17 @@
 									</div>
 								</div>
 							</div>
-						</div>
 					</div>
-					<div class="mb-3 row">
-						<label class="col-3 col-form-label">Password</label>
-						<div class="col">
-							<input type="text" class="form-control password" placeholder="Password">
-							<small class="form-hint">
-								Your password must be 8-20 characters long, contain letters and numbers, and must not contain
-								spaces, special characters, or emoji.
-							</small>
+					<div class="col-md-12 mt-0">
+						<div class="mb-2">
+							<label class="form-label">Password</label>
+							<div class="col">
+								<input type="text" class="form-control password" placeholder="Password">
+								<small class="form-hint">
+									Your password must be 8-20 characters long, contain letters and numbers, and must not contain
+									spaces, special characters, or emoji.
+								</small>
+							</div>
 						</div>
 					</div>
 				</div>

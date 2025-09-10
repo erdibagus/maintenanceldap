@@ -124,7 +124,6 @@ class LoginsController extends AppController{
         exit();
     }
 
-
     private function cekLock($username, $ou) {
         try {
             $conn = $this->Function->ldapConnect(true);

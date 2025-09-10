@@ -17,6 +17,12 @@
     // getNotif()
 // });
 
+$(document).ajaxStart(function(){
+    $('#loading').fadeIn();
+}).ajaxStop(function(){
+    $('#loading').fadeOut();
+});
+
 let toastMixin = Swal.mixin({
     toast: true,
     position: 'top-right',
