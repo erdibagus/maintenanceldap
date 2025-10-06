@@ -65,28 +65,30 @@ class UsersController extends AppController{
 
     public function tambah() {
         $this->autoRender = false;
-        $uid   = $_POST['id'] ?? '';
-        $sn    = $_POST['nama'] ?? '-';
-        $cn    = $_POST['username'] ?? '';
-        $pass  = $_POST['password'] ?? '';
-        $email = $_POST['email'] ?? '';
-        $ou = $_POST['ou'] ?? '';
+
+        var_dump($_POST);exit();
 
         try {
             $conn = $this->Function->ldapConnect(true);
-            $dn = "uid=$uid,ou=$ou," . $this->Function->ldapConfig['base_dn'];
-            $salt = random_bytes(4);
-            $hash = sha1($pass . $salt, true) . $salt;
+            $dn = "uid={$_POST['id']},ou={$_POST['ou']}," . $this->Function->ldapConfig['base_dn'];
+
             $entry = [
-                "cn" => $cn,
-                "sn" => $sn,
-                "uid" => $uid,
-                "mail" => $email,
-                "objectClass" => ["inetOrgPerson", "top"],
-                "userPassword" => "{SSHA}" . base64_encode($hash),
-                "pwdPolicySubentry" => "cn=default,ou=policies,". $this->Function->ldapConfig['base_dn']
+                "objectClass"      => ["inetOrgPerson", "bernofarmPerson"],
+                "uid"              => $_POST['id'] ?? '',
+                "sn"               => $_POST['sn'] ?? '-',
+                "cn"               => $_POST['nama'] ?? '',
+                "description"      => $_POST['ket'] ?? '',
+                "employeeNumber"   => $_POST['nik'] ?? '',
+                "departmentNumber" => $_POST['divisi'] ?? '',
+                "employeeType"     => $_POST['status'] ?? '',
+                "noKTP"            => $_POST['ktp'] ?? '',
+                "firstNik"         => $_POST['nikawal'] ?? '',
+                "lastNik"          => $_POST['nikakhir'] ?? '',
+                "birthDate"        => $_POST['tgllahir'] ?? '',
+                "ou"               => $_POST['ou'] ?? '',
+                "userPassword"     => $_POST['password'] ?? 'user123'
             ];
-            if (ldap_add($conn, $dn, $entry)) {
+            if (@ldap_add($conn, $dn, $entry)) {
                 echo "sukses";
             } else {
                 echo "gagal: " . ldap_error($conn);
@@ -100,33 +102,32 @@ class UsersController extends AppController{
 
     public function ubah() {
         $this->autoRender = false;
-        $uidLama   = $_POST['idLama'] ?? '';
-        $uid   = $_POST['id'] ?? '';
-        $sn    = $_POST['nama'] ?? '-';
-        $cn    = $_POST['username'] ?? '';
-        $pass = $_POST['password'] ?? '';
-        $email = $_POST['email'] ?? '';
-        $ouLama = $_POST['ouLama'] ?? '';
-        $ou = $_POST['ou'] ?? '';
+
+        // var_dump($_POST);exit();
 
         try {
             // $conn = $this->ldapConnect();
             $conn = $this->Function->ldapConnect(true);
-            $dn = "uid=$uidLama,ou=$ouLama," . $this->Function->ldapConfig['base_dn'];
-            $salt = random_bytes(4);
-            $hash = sha1($pass . $salt, true) . $salt;
+            $dn = "uid={$_POST['id']},ou={$_POST['ou']}," . $this->Function->ldapConfig['base_dn'];
+            
             $entry = [
-                "cn" => $cn,
-                "sn" => $sn,
-                "mail" => $email,
-                "userPassword" => "{SSHA}" . base64_encode($hash),
-                "pwdPolicySubentry" => "cn=default,ou=policies," . $this->Function->ldapConfig['base_dn']
+                "uid"              => $_POST['id'] ?? '',
+                "sn"               => $_POST['sn'] ?? '-',
+                "cn"               => $_POST['nama'] ?? '',
+                "description"      => $_POST['ket'] ?? '',
+                "employeeNumber"   => $_POST['nik'] ?? '',
+                "departmentNumber" => $_POST['divisi'] ?? '',
+                "employeeType"     => $_POST['status'] ?? '',
+                "noKTP"            => $_POST['ktp'] ?? '',
+                "firstNik"         => $_POST['nikawal'] ?? '',
+                "lastNik"          => $_POST['nikakhir'] ?? '',
+                "birthDate"        => $_POST['tgllahir'] ?? '',
+                "ou"               => $_POST['ou'] ?? '',
+                
             ];
-            if (ldap_modify($conn, $dn, $entry)) {
+
+            if (@ldap_modify($conn, $dn, $entry)) {
                 echo "sukses";
-                if($uidLama !== $uid || $ouLama !== $ou){
-                    $this->ubahUid($uidLama, $uid, $ouLama, $ou);
-                }
             } else {
                 echo "gagal: " . ldap_error($conn);
             }
@@ -161,6 +162,147 @@ class UsersController extends AppController{
         }
     }
 
+    public function mailtest(){
+        $this->autoRender = false;
+        date_default_timezone_set('Asia/Jakarta');
+
+        $key = "B3rn04p1";
+
+        $headers = getallheaders();
+        $clientKey = isset($headers['Authorization']) ? $headers['Authorization'] : null;
+
+        // Validasi API Key
+        if ($clientKey !== $key) {
+            http_response_code(401); // Unauthorized
+            header('Content-Type: application/json');
+            echo json_encode([
+                "status"  => "error",
+                "message" => "Invalid API Key"
+            ]);
+            exit;
+        }
+
+        $PREAUTH_KEY="5386629eecd3971d5770bd0b1424e6ef7a31f53fdaa7c90a7ab027d7cbca4496";
+        $WEB_MAIL_PREAUTH_URL="https://mailtest.bernofarm.com/service/preauth";
+        
+        $user   = "bagus";
+        $domain = "mailtest.bernofarm.com";
+        $email  = "{$user}@{$domain}";
+
+        $timestamp    = time() * 1000;
+        $preauthToken = hash_hmac("sha1", $email."|name|0|".$timestamp, $PREAUTH_KEY);
+        $preauthURL   = $WEB_MAIL_PREAUTH_URL
+                    . "?account=".$email
+                    . "&by=name"
+                    . "&timestamp=".$timestamp
+                    . "&expires=0"
+                    . "&preauth=".$preauthToken;
+
+        header('Content-Type: application/json');
+        echo json_encode([
+            "status" => "success",
+            "email"  => $email,
+            "url"    => $preauthURL
+        ]);
+    }
+
+    public function ubahstatus(){
+        $this->autoRender = false;
+
+        $zimbraHost  = "https://mailtest.bernofarm.com:7071/service/admin/soap";
+        $zimbraAdmin = "admin@mailtest.bernofarm.com";
+        $zimbraPass  = "You4tourlah";
+        $userEmail   = "bagus@mailtest.bernofarm.com";
+        $newStatus   = "closed"; // "active", "closed", "locked", "maintenance"
+
+        $loginXML = <<<EOT
+        <soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope">
+        <soap:Body>
+            <AuthRequest xmlns="urn:zimbraAdmin">
+            <name>{$zimbraAdmin}</name>
+            <password>{$zimbraPass}</password>
+            </AuthRequest>
+        </soap:Body>
+        </soap:Envelope>
+        EOT;
+
+        $response = $this->sendRequest($zimbraHost, $loginXML);
+        $xml = simplexml_load_string($response);
+        $xml->registerXPathNamespace('zimbra', 'urn:zimbraAdmin');
+        $xml->registerXPathNamespace('soap', 'http://www.w3.org/2003/05/soap-envelope');
+        $authToken = (string) $xml->xpath('//zimbra:authToken')[0] ?? null;
+
+        if (empty($authToken)) {
+            die("Gagal mendapatkan authToken.");
+        }
+
+        $getAccountXML = <<<EOT
+        <soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope">
+        <soap:Header>
+            <context xmlns="urn:zimbra"><authToken>{$authToken}</authToken></context>
+        </soap:Header>
+        <soap:Body>
+            <GetAccountRequest xmlns="urn:zimbraAdmin">
+            <account by="name">{$userEmail}</account>
+            </GetAccountRequest>
+        </soap:Body>
+        </soap:Envelope>
+        EOT;
+
+        $response = $this->sendRequest($zimbraHost, $getAccountXML);
+        $xml = simplexml_load_string($response);
+        $xml->registerXPathNamespace('zimbra', 'urn:zimbraAdmin');
+        $accountId = (string) $xml->xpath('//zimbra:GetAccountResponse/zimbra:account/@id')[0] ?? null;
+
+        if (empty($accountId)) {
+            die("Gagal mendapatkan accountId.");
+        }
+
+        $modifyXML = <<<EOT
+        <soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope">
+        <soap:Header>
+            <context xmlns="urn:zimbra"><authToken>{$authToken}</authToken></context>
+        </soap:Header>
+        <soap:Body>
+            <ModifyAccountRequest xmlns="urn:zimbraAdmin" id="{$accountId}">
+            <a n="zimbraAccountStatus">{$newStatus}</a>
+            </ModifyAccountRequest>
+        </soap:Body>
+        </soap:Envelope>
+        EOT;
+
+        $response = $this->sendRequest($zimbraHost, $modifyXML);
+
+        if (strpos($response, "ModifyAccountResponse") !== false) {
+            echo "Status berhasil diubah\n";
+        } else {
+            echo "Gagal mengubah status.\n";
+            echo "Response: \n$response\n";
+        }
+    }
+
+    private function sendRequest($url, $data) {
+        $ch = curl_init($url);
+        curl_setopt_array($ch, [
+            CURLOPT_POST           => true,
+            CURLOPT_POSTFIELDS     => $data,
+            CURLOPT_HTTPHEADER     => ["Content-Type: application/soap+xml"],
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_SSL_VERIFYPEER => false,
+            CURLOPT_SSL_VERIFYHOST => false
+        ]);
+        $response = curl_exec($ch);
+        $error    = curl_error($ch);
+        curl_close($ch);
+        
+        if ($error) {
+            die("cURL Error: " . $error);
+        }
+        return $response;
+    }
 }
 	
 ?>
+
+
+

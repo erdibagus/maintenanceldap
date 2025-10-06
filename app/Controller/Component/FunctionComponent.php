@@ -6,7 +6,7 @@ class FunctionComponent extends Component{
     public function __construct() {
         $host = $_SERVER['HTTP_HOST'];
 
-        if ($host === 'localhost' || $host === '127.0.0.1' || $host === '192.168.0.122') {
+        if ($host === 'localhost' || $host === '127.0.0.1' || $host === '192.168.0.101' ) {
             //debug
             $this->ldapConfig = [
                 'host' => 'ldap://103.123.63.108:7766',
@@ -70,6 +70,34 @@ class FunctionComponent extends Component{
                 if (preg_match('/ou=([^,]+)/i', $entries[0]["dn"], $matches)) {
                     return $matches[1];
                 }
+            }
+
+            return null;
+        } catch (Exception $e) {
+            error_log("LDAP cekOu() error [user=$username]: " . $e->getMessage());
+            return null;
+        } finally {
+            if ($conn) {
+                $this->ldapDisconnect($conn);
+            }
+        }
+    }
+
+    public function cekUid($username) {
+        $conn = null;
+        try {
+            $conn = $this->ldapConnect(true);
+            $filter = "(mail=$username*@*)"; //ganti mail=$username*@*
+            $result = ldap_search($conn, $this->ldapConfig['base_dn'], $filter, ["uid"]);
+
+            if (!$result) {
+                throw new Exception("LDAP search gagal untuk user: $username");
+            }
+
+            $entries = ldap_get_entries($conn, $result);
+
+            if ($entries["count"] > 0) {
+                return $entries[0]['uid'][0];
             }
 
             return null;

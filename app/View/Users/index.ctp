@@ -82,83 +82,94 @@
 			</div>
 			<div class="modal-body">
 				<div class="row row-cards">
-					<div class="col-md-12">
-						<div class="mb-2">
+					<div class="col-md-8">
+						<div class="mb-1">
 							<label class="form-label">ID</label>
-							<input type="text" class="form-control id" disabled placeholder="ID">
+							<input type="text" class="form-control id" placeholder="ID">
+						</div>
+					</div>
+					<div class="col-md-4 colGroup">
+						<div class="mb-1">
+							<label class="form-label">Group</label>
+							<select class="form-control form-select group">
+								<option value="">Pilih..</option>
+								<option value="jkt">Jakarta</option>
+								<option value="sda">Sidoharjo</option>
+							</select>
 						</div>
 					</div>
 					<div class="col-sm-7 col-md-8">
-						<div class="mb-2">
+						<div class="mb-1">
 							<label class="form-label">Nama</label>
 							<input type="text" class="form-control nama" placeholder="Nama">
 						</div>
 					</div>
 					<div class="col-sm-5 col-md-4">
-						<div class="mb-2">
+						<div class="mb-1">
 							<label class="form-label">NIK</label>
 							<input type="email" class="form-control nik" placeholder="NIK">
 						</div>
 					</div>
 					<div class="col-sm-6 col-md-6">
-						<div class="mb-2">
+						<div class="mb-1">
 							<label class="form-label">Divisi</label>
 							<input type="text" class="form-control divisi" placeholder="Divisi">
 						</div>
 					</div>
 					<div class="col-sm-6 col-md-6">
-						<div class="mb-2">
+						<div class="mb-1">
 							<label class="form-label">Tgl Lahir</label>
 							<input type="text" class="form-control tgllahir" placeholder="Tgl Lahir">
 						</div>
 					</div>
 					<div class="col-md-12">
-						<div class="mb-2">
+						<div class="mb-1">
 							<label class="form-label">No. KTP</label>
 							<input type="text" class="form-control ktp" placeholder="No. KTP">
 						</div>
 					</div>
 					<div class="col-sm-6 col-md-4">
-						<div class="mb-2">
+						<div class="mb-1">
 							<label class="form-label">NIK Awal</label>
 							<input type="text" class="form-control nikawal" placeholder="NIK Awal">
 						</div>
 					</div>
 					<div class="col-sm-6 col-md-4">
-						<div class="mb-2">
+						<div class="mb-1">
 							<label class="form-label">NIK Akhir</label>
 							<input type="test" class="form-control nikakhir" placeholder="NIK Akhir">
 						</div>
 					</div>
 					<div class="col-md-4">
-						<div class="mb-2">
+						<div class="mb-1">
 							<label class="form-label">Status</label>
 							<select class="form-control form-select statuss">
+								<option value="">Pilih..</option>
 								<option value="aktif">Aktif</option>
 								<option value="nonaktif">Non Aktif</option>
 							</select>
 						</div>
 					</div>
 					<div class="col-md-12">
-						<div class="mb-2 mb-0">
+						<div class="mb-1 mb-0">
 							<label class="form-label">Keterangan</label>
 							<textarea rows="5" class="form-control ket" placeholder="Keterangan"></textarea>
 						</div>
 					</div>
-					<div class="col-md-12">
-							<div class="alert alert-warning" role="alert">
-								<div class="d-flex">
-									<div>
-										<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon alert-icon icon-2"><path d="M12 9v4"></path><path d="M10.363 3.591l-8.106 13.534a1.914 1.914 0 0 0 1.636 2.871h16.214a1.914 1.914 0 0 0 1.636 -2.87l-8.106 -13.536a1.914 1.914 0 0 0 -3.274 0z"></path><path d="M12 16h.01"></path></svg>
-									</div>
-									<div>
-										<h4 class="alert-title">Kosongkan jika tidak ingin mengubah password!</h4>
-									</div>
+					<div class="col-md-12 alertP">
+						<div class="alert alert-warning" role="alert">
+							<div class="d-flex">
+								<div>
+									<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon alert-icon icon-2"><path d="M12 9v4"></path><path d="M10.363 3.591l-8.106 13.534a1.914 1.914 0 0 0 1.636 2.871h16.214a1.914 1.914 0 0 0 1.636 -2.87l-8.106 -13.536a1.914 1.914 0 0 0 -3.274 0z"></path><path d="M12 16h.01"></path></svg>
+								</div>
+								<div>
+									<h4 class="alert-title">Kosongkan jika tidak ingin mengubah password!</h4>
 								</div>
 							</div>
+						</div>
 					</div>
 					<div class="col-md-12 mt-0">
-						<div class="mb-2">
+						<div class="mb-1">
 							<label class="form-label">Password</label>
 							<div class="col">
 								<input type="text" class="form-control password" placeholder="Password">

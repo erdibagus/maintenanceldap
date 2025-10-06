@@ -18,7 +18,13 @@ class LoginsController extends AppController{
         $user = $_POST['username'] ?? '';
         $pass = $_POST['password'] ?? '';
 
-        $ldap_host = "ldap://103.123.63.108:7766"; 
+        $host = $_SERVER['HTTP_HOST'];
+        if ($host === 'localhost' || $host === '127.0.0.1' || $host === '192.168.0.101' ) {
+            $ldap_host = "ldap://103.123.63.108:7766";
+        }else{
+            $ldap_host = "ldap://localhost:7766";
+        }
+         
         $ldap_port = null;
 
         // Default response
@@ -26,6 +32,13 @@ class LoginsController extends AppController{
             "status"  => "error",
             "message" => "Terjadi kesalahan"
         ];
+
+        $user = $this->Function->cekUid($user);
+        if (!$user) {
+            $response = ["status" => "error", "message" => "User tidak ditemukan"];
+            $this->sendJson($response);
+            return;
+        }
 
         $ou = $this->Function->cekOu($user);
         if (!$ou) {

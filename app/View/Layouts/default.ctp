@@ -11,9 +11,11 @@
 	echo $this->Html->meta('icon','/img/berno1.png'); 
 	echo $this->Html->css('/css/font-awesome.min');
 	echo $this->Html->css('style');
-    echo $this->Html->css('/css/sweatalert');
+    echo $this->Html->css('sweatalert');
+    echo $this->Html->css('jquery-ui');
 	echo $this->Html->css('/dist/DataTables/datatables.min');
 	echo $this->Html->script('jquery.min');
+	echo $this->Html->script('jquery-ui.min');
 	echo $this->Html->script('sweatalert');
 	echo $this->Html->script('/dist/DataTables/datatables.min');
 	$path = WWW_ROOT . 'js' . DS . 'function.js';

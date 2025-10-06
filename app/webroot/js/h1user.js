@@ -1,6 +1,13 @@
 let tableData
 $(document).ready(function(){
-getGroup()
+    getGroup()
+    $(".tgllahir").datepicker({
+        dateFormat: "dd/mm/yy",   
+        changeMonth: true,        
+        changeYear: true,         
+        maxDate: 0,
+        yearRange: "1975:+0"
+    });
 })
 function getGroup(){
   $.ajax({
@@ -66,7 +73,7 @@ function getData(mode,ouSave){
                     let day = str.substring(6, 8);
 
                     // format ke d-m-y
-                    let tgllahir = `${day}-${month}-${year}`;
+                    let tgllahir = `${day}/${month}/${year}`;
 
                     rows += "<tr>";
                     rows += "<td>" + n + ".</td>";
@@ -82,7 +89,7 @@ function getData(mode,ouSave){
                     rows += "<td>" + (result[i]?.description?.[0] ?? "") + "</td>";
                     rows += `<td><button data-ou='${ou}' data-id='${result[i]?.uid?.[0] ?? ""}' data-nama='${result[i]?.cn?.[0] ?? ""}' data-nik='${result[i]?.employeenumber?.[0] ?? ""}' data-divisi='${result[i]?.departmentnumber?.[0] ?? ""}'
                                  data-tgllahir='${tgllahir}' data-ktp='${result[i]?.noktp?.[0] ?? ""}' data-nikawal='${result[i]?.firstnik?.[0] ?? ""}' data-nikakhir='${result[i]?.lastnik?.[0] ?? ""}' data-ket='${result[i]?.description?.[0] ?? ""}' data-status='${result[i]?.employeetype?.[0] ?? ""}' onclick='edit(this)' class='btn btn-1'><i class='fa fa-edit'></i></button>
-                                <button class='btn btn-1' onclick='btnHapus("${result[i]?.sn?.[0] ?? ""}","${result[i]?.uid?.[0] ?? ""}","${ou}")'><i class='fa fa-trash'></i></button>
+                                <button class='btn btn-1' onclick='btnHapus("${result[i]?.cn?.[0] ?? ""}","${result[i]?.uid?.[0] ?? ""}","${ou}")'><i class='fa fa-trash'></i></button>
                               </td>`;
                     rows += "</tr>";
                     n++
@@ -136,32 +143,49 @@ function hapus(uid,ou){
 }
 
 function save(mode){
-  const idLama = $('.idLama').val()
   const id = $('.id').val()
   const nama = $('.nama').val()
-  const username = $('.username').val()
-  const password = $('.password').val()
-  const email = $('.email').val()
-  const ouLama = $('.ou').val()
-  const ou = $('.formOu').val()
+  const nik = $('.nik').val()
+  const divisi = $('.divisi').val()
+  const tgllahir = $('.tgllahir').val()
+  const ktp = $('.ktp').val()
+  const nikawal = $('.nikawal').val()
+  const nikakhir = $('.nikakhir').val()
+  const status = $('.statuss').val()
+  const ket = $('.ket').val()
+  const ou = $('.group').val()
+  const pass = $('.password').val()
+
+  if (!id || !nama || !nik || !divisi || !tgllahir || !ktp || !nikawal || !nikakhir || !status || !ket || !ou) {
+      toastMixin.fire({
+                icon: 'error',
+                title: 'Semua field harus diisi!'
+            });
+      return false; 
+  }
 
   const url = mode === 1 ? "users/ubah" : "users/tambah";
+  const tgl = dateLDAP(tgllahir)
 
   $.ajax({
         url:url,
         type:"POST",
         data: ({
-              idLama: idLama,
               id: id,
               nama: nama,
-              username: username,
-              password: password,
-              email:email,
-              ouLama:ouLama,
-              ou:ou
-        }),
+              nik: nik,
+              divisi:divisi,
+              tgllahir:tgl,
+              ktp:ktp,
+              nikawal:nikawal,
+              nikakhir:nikakhir,
+              status:status,
+              ket:ket,
+              ou:ou,
+              password: pass
+            }),
         success:function(result){
-          console.log(result)
+          console.log(result);return
           if(result == 'sukses'){
             toastMixin.fire({
                 icon: 'success',
@@ -183,6 +207,8 @@ function edit(el) {
     $('.btnSave').removeAttr('onclick');
     $('.btnSave').attr('onclick', 'save(1)');
 
+    $('.alertP').removeClass('d-none')
+
     let $btn = $(el);
 
     let id       = $btn.data("id");
@@ -195,6 +221,7 @@ function edit(el) {
     let nikakhir    = $btn.data("nikakhir");
     let status    = $btn.data("status");
     let ket    = $btn.data("ket");
+    let ou    = $btn.data("ou");
 
     // Isi ke form edit
     $(".idLama").val(id);
@@ -208,6 +235,7 @@ function edit(el) {
     $(".nikakhir").val(nikakhir);
     $(".statuss").val(status);
     $(".ket").val(ket);
+    $(".group").val(ou);
 
     $('.password').val('')
     $('.modal-title').text('Ubah User')
@@ -218,12 +246,20 @@ function tambah(){
   $('.btnSave').removeAttr('onclick');
   $('.btnSave').attr('onclick', 'save(2)');
 
-  $('.id').val('')
-  $('.nama').val('')
-  $('.username').val('')
+  $('.alertP').addClass('d-none')
+
+  $(".id").val("");
+  $(".nama").val("");
+  $(".nik").val("");
+  $(".divisi").val("");
+  $(".tgllahir").val("");
+  $(".ktp").val("");
+  $(".nikawal").val("");
+  $(".nikakhir").val("");
+  $(".statuss").val("");
+  $(".ket").val("");
+  $(".group").val("");
   $('.password').val('')
-  $('.email').val('')
-  $('.formOu').val('')
   $('.modal-title').text('Tambah User')
 }
 
@@ -258,6 +294,21 @@ function initDtDetail() {
             }
         }
     });
+}
+
+function dateLDAP(tgl){
+  const [hari, bulan, tahun] = tgl.split("/");
+
+  const dateUTC = new Date(Date.UTC(tahun, bulan - 1, hari));
+
+  const YYYY = dateUTC.getUTCFullYear();
+  const MM = String(dateUTC.getUTCMonth() + 1).padStart(2, "0");
+  const DD = String(dateUTC.getUTCDate()).padStart(2, "0");
+  const HH = String(dateUTC.getUTCHours()).padStart(2, "0");
+  const min = String(dateUTC.getUTCMinutes()).padStart(2, "0");
+  const SS = String(dateUTC.getUTCSeconds()).padStart(2, "0");
+
+  return `${YYYY}${MM}${DD}${HH}${min}${SS}Z`;
 }
 
 
