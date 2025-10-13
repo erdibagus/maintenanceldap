@@ -35,6 +35,12 @@ class OusController extends AppController{
         $updated = [];
         $failed = [];
 
+                // index idmkts
+        $mapIdMkt = [];
+        foreach ($sqlMasterIdMkts as $idMkt) {
+            $mapIdMkt[$idMkt[0]['idkry']] = $idMkt;
+        }
+
         for ($i = 0; $i < $entries["count"]; $i++) {
             $dn = $entries[$i]["dn"];
 
@@ -128,6 +134,105 @@ class OusController extends AppController{
         
         $this->sendJson($response);
     }
+
+
+public function sinkronDataEmail() {
+    $ldapHost = "ldap://103.123.63.108:7766";
+    $ldapPort = null;
+    $bindDn   = "cn=admin,dc=bernofarm,dc=com";
+    $bindPass = "You4tourlah";
+    $baseDn   = "dc=bernofarm,dc=com";
+
+    $this->autoRender = false;
+    $this->loadModel('User');
+
+    // Ambil semua data email dari tabel emailkry
+    $sqlMasterIdMkts = $this->User->query("SELECT * FROM ldap.emailkry e");
+
+    $mapIdMkt = [];
+    foreach ($sqlMasterIdMkts as $idMkt) {
+        $mapIdMkt[$idMkt['e']['id_karyawan']] = $idMkt['e']['email'];
+    }
+
+    // Koneksi ke LDAP
+    $ldapconn = ldap_connect($ldapHost, $ldapPort);
+    if (!$ldapconn) {
+        return ["status" => "error", "message" => "Tidak bisa konek ke LDAP server"];
+    }
+
+    ldap_set_option($ldapconn, LDAP_OPT_PROTOCOL_VERSION, 3);
+    ldap_set_option($ldapconn, LDAP_OPT_REFERRALS, 0);
+
+    // Bind admin
+    if (!ldap_bind($ldapconn, $bindDn, $bindPass)) {
+        return ["status" => "error", "message" => "Bind gagal, cek user/pass"];
+    }
+
+    // Cari semua user inetOrgPerson
+    $filter = "(objectClass=inetOrgPerson)";
+    $search = ldap_search($ldapconn, $baseDn, $filter, ["uid","cn","mail","dn"]);
+    $entries = ldap_get_entries($ldapconn, $search);
+
+    $added = [];
+    $updated = [];
+    $failed = [];
+
+    for ($i = 0; $i < $entries["count"]; $i++) {
+        $uid = isset($entries[$i]["uid"][0]) ? $entries[$i]["uid"][0] : null;
+        $dn  = $entries[$i]["dn"];
+
+        if ($uid && isset($mapIdMkt[$uid])) {
+            $emailBaru = $mapIdMkt[$uid];
+            $emailLama = isset($entries[$i]["mail"][0]) ? $entries[$i]["mail"][0] : null;
+
+            // Jika belum ada mail → tambah baru
+            if ($emailLama === null) {
+                $entry = ["mail" => $emailBaru];
+                if (ldap_mod_add($ldapconn, $dn, $entry)) {
+                    $added[] = [
+                        "uid" => $uid,
+                        "email_baru" => $emailBaru
+                    ];
+                } else {
+                    $failed[] = [
+                        "uid" => $uid,
+                        "aksi" => "add",
+                        "error" => ldap_error($ldapconn)
+                    ];
+                }
+            }
+            // Jika email berbeda → update
+            elseif ($emailLama !== $emailBaru) {
+                $entry = ["mail" => $emailBaru];
+                if (ldap_modify($ldapconn, $dn, $entry)) {
+                    $updated[] = [
+                        "uid" => $uid,
+                        "email_lama" => $emailLama,
+                        "email_baru" => $emailBaru
+                    ];
+                } else {
+                    $failed[] = [
+                        "uid" => $uid,
+                        "aksi" => "modify",
+                        "error" => ldap_error($ldapconn)
+                    ];
+                }
+            }
+        }
+    }
+
+    ldap_unbind($ldapconn);
+
+    return [
+        "status" => "success",
+        "added" => $added,
+        "updated" => $updated,
+        "failed" => $failed,
+        "total_added" => count($added),
+        "total_updated" => count($updated),
+        "total_failed" => count($failed)
+    ];
+}
 
 
 

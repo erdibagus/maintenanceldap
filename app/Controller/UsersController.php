@@ -17,13 +17,37 @@ class UsersController extends AppController{
 
         $ou = $_POST['ou'];
         $nama = $_POST['nama'];
+        $akses = $_POST['akses'];
 
-        if($nama) $filter = "(cn=*$nama*)";
+        $filterOu = "";
+
+        if($ou != "") $filterOu = "ou=$ou,";
+        
+        if ($akses != "" && $nama != "") {
+            // Filter jika ada OU dan CN
+            $filter = "(&" .
+                        "(objectClass=*)" .
+                        "(ou=$akses)" .
+                        "(cn=*$nama*)" .
+                      ")";
+        } elseif ($akses != "") {
+            // Hanya filter berdasarkan OU
+            $filter = "(&" .
+                        "(objectClass=*)" .
+                        "(ou=$akses)" .
+                      ")";
+        } elseif ($nama != "") {
+            // Hanya filter berdasarkan CN
+            $filter = "(&" .
+                        "(objectClass=*)" .
+                        "(cn=*$nama*)" .
+                      ")";
+        }
 
         try {
             $conn = $this->Function->ldapConnect(true);
 
-            $search = ldap_search($conn, "ou=$ou,".$this->Function->ldapConfig['base_dn'], $filter, $attributes);
+            $search = ldap_search($conn, $filterOu.$this->Function->ldapConfig['base_dn'], $filter, $attributes);
             if (!$search) {
                 throw new Exception("Search gagal: " . ldap_error($conn));
             }
@@ -44,13 +68,11 @@ class UsersController extends AppController{
 
     public function hapus() {
         $this->autoRender = false;
-        $uid = $_POST['uid'] ?? null;
-        $ou = $_POST['ou'] ?? null;
-        if (!$uid) return print "UID kosong";
+        $dn = $_POST['dn'] ?? null;
+        if (!$dn) return print "DN kosong";
 
         try {
             $conn = $this->Function->ldapConnect(true);
-            $dn = "uid=$uid,ou=$ou," . $this->Function->ldapConfig['base_dn'];
             if (ldap_delete($conn, $dn)) {
                 echo "sukses";
             } else {
@@ -66,7 +88,7 @@ class UsersController extends AppController{
     public function tambah() {
         $this->autoRender = false;
 
-        var_dump($_POST);exit();
+        // var_dump($_POST);exit();
 
         try {
             $conn = $this->Function->ldapConnect(true);
@@ -85,7 +107,8 @@ class UsersController extends AppController{
                 "firstNik"         => $_POST['nikawal'] ?? '',
                 "lastNik"          => $_POST['nikakhir'] ?? '',
                 "birthDate"        => $_POST['tgllahir'] ?? '',
-                "ou"               => $_POST['ou'] ?? '',
+                "mail"             => $_POST['email'] ?? '',
+                "ou"               => $_POST['akses'] ?? '',
                 "userPassword"     => $_POST['password'] ?? 'user123'
             ];
             if (@ldap_add($conn, $dn, $entry)) {
@@ -106,9 +129,8 @@ class UsersController extends AppController{
         // var_dump($_POST);exit();
 
         try {
-            // $conn = $this->ldapConnect();
             $conn = $this->Function->ldapConnect(true);
-            $dn = "uid={$_POST['id']},ou={$_POST['ou']}," . $this->Function->ldapConfig['base_dn'];
+            $dn = $_POST['dn'];
             
             $entry = [
                 "uid"              => $_POST['id'] ?? '',
@@ -122,7 +144,8 @@ class UsersController extends AppController{
                 "firstNik"         => $_POST['nikawal'] ?? '',
                 "lastNik"          => $_POST['nikakhir'] ?? '',
                 "birthDate"        => $_POST['tgllahir'] ?? '',
-                "ou"               => $_POST['ou'] ?? '',
+                "ou"               => $_POST['akses'] ?? '',
+                "mail"             => $_POST['email'] ?? '',
                 
             ];
 

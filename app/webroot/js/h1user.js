@@ -16,7 +16,7 @@ function getGroup(){
             result = JSON.parse(result)
             // console.log(result)
             if (result.count > 0) {
-              let rows = "<option value=''>--Pilih--</option>";
+              let rows = "<option value=''>Pilih..</option>";
 
               for (let i = 0; i < result.count; i++) {
                   if((result[i]?.ou?.[0] ?? "") === 'policies') continue
@@ -33,14 +33,15 @@ function getGroup(){
 function getData(mode,ouSave){
   let ou = $('.ou').val()
   const nama = $('.filterNama').val()
+  const akses = $('.filterAkses').val()
 
   if(mode == 1){
     ou = ouSave
   } else {
-    if (!ou) return toastMixin.fire({
-                      icon: 'warning',
-                      title: 'Pilih OU.'
-                  });
+    // if (!ou) return toastMixin.fire({
+    //                   icon: 'warning',
+    //                   title: 'Pilih OU.'
+    //               });
   }
 
   $.ajax({
@@ -48,7 +49,8 @@ function getData(mode,ouSave){
         type:"POST",
         data: ({
           ou: ou,
-          nama:nama
+          nama:nama,
+          akses:akses,
         }),
         success:function(result){
             // console.log(result)
@@ -86,10 +88,10 @@ function getData(mode,ouSave){
                     // rows += "<td>" + (result[i]?.firstnik?.[0] ?? "") + "</td>";
                     // rows += "<td>" + (result[i]?.lastnik?.[0] ?? "") + "</td>";
                     rows += "<td>" + (result[i]?.employeetype?.[0] ?? "") + "</td>";
-                    rows += "<td>" + (result[i]?.description?.[0] ?? "") + "</td>";
-                    rows += `<td><button data-ou='${ou}' data-id='${result[i]?.uid?.[0] ?? ""}' data-nama='${result[i]?.cn?.[0] ?? ""}' data-nik='${result[i]?.employeenumber?.[0] ?? ""}' data-divisi='${result[i]?.departmentnumber?.[0] ?? ""}'
+                    rows += "<td>" + (result[i]?.mail?.[0] ?? "") + "</td>";
+                    rows += `<td><button data-dn='${result[i]?.dn ?? ""}' data-email='${result[i]?.mail?.[0] ?? ""}' data-ou='${result[i]?.ou?.[0] ?? ""}' data-id='${result[i]?.uid?.[0] ?? ""}' data-nama='${result[i]?.cn?.[0] ?? ""}' data-nik='${result[i]?.employeenumber?.[0] ?? ""}' data-divisi='${result[i]?.departmentnumber?.[0] ?? ""}'
                                  data-tgllahir='${tgllahir}' data-ktp='${result[i]?.noktp?.[0] ?? ""}' data-nikawal='${result[i]?.firstnik?.[0] ?? ""}' data-nikakhir='${result[i]?.lastnik?.[0] ?? ""}' data-ket='${result[i]?.description?.[0] ?? ""}' data-status='${result[i]?.employeetype?.[0] ?? ""}' onclick='edit(this)' class='btn btn-1'><i class='fa fa-edit'></i></button>
-                                <button class='btn btn-1' onclick='btnHapus("${result[i]?.cn?.[0] ?? ""}","${result[i]?.uid?.[0] ?? ""}","${ou}")'><i class='fa fa-trash'></i></button>
+                                <button class='btn btn-1' onclick='btnHapus("${result[i]?.cn?.[0] ?? ""}","${result[i]?.dn ?? ""}")'><i class='fa fa-trash'></i></button>
                               </td>`;
                     rows += "</tr>";
                     n++
@@ -108,24 +110,23 @@ function getData(mode,ouSave){
     })
 }
 
-function btnHapus(nama,uid,ou){
+function btnHapus(nama,dn){
   $('.btnDel').removeAttr('onclick');
-  $('.btnDel').attr('onclick', `hapus('${uid}','${ou}')`);
+  $('.btnDel').attr('onclick', `hapus('${dn}')`);
   $('.namaHapus').text(nama)
   $('#modal-delete').modal('show');
 }
 
-function hapus(uid,ou){
+function hapus(dn){
   $.ajax({
         url:"users/hapus",
         type:"POST",
         data: ({
-          uid: uid,
-          ou: ou,
+          dn: dn
         }),
         success:function(result){
-          console.log(result)
-          if(result == 'sukses'){
+          const text = result.replace(/\s+/g, '');
+          if(text == 'sukses'){
             toastMixin.fire({
                 icon: 'success',
                 title: 'Data berhasil dihapus.'
@@ -136,13 +137,14 @@ function hapus(uid,ou){
                 title: 'Data gagal dihapus.'
             });
           }
-
-          getData(1,ou)
+          const ouDn = dn.split(',').map(s => s.trim()).find(s => s.startsWith('ou='))?.slice(3) || '';
+          getData(1,ouDn)
         }
     })
 }
 
 function save(mode){
+  const dn = $('.dn').val()
   const id = $('.id').val()
   const nama = $('.nama').val()
   const nik = $('.nik').val()
@@ -154,6 +156,8 @@ function save(mode){
   const status = $('.statuss').val()
   const ket = $('.ket').val()
   const ou = $('.group').val()
+  const akses = $('.akses').val()
+  const email = $('.email').val()
   const pass = $('.password').val()
 
   if (!id || !nama || !nik || !divisi || !tgllahir || !ktp || !nikawal || !nikakhir || !status || !ket || !ou) {
@@ -171,6 +175,7 @@ function save(mode){
         url:url,
         type:"POST",
         data: ({
+              dn: dn,
               id: id,
               nama: nama,
               nik: nik,
@@ -182,11 +187,14 @@ function save(mode){
               status:status,
               ket:ket,
               ou:ou,
+              akses:akses,
+              email:email,
               password: pass
             }),
         success:function(result){
-          console.log(result);return
-          if(result == 'sukses'){
+          // console.log(result);return
+          const text = result.replace(/\s+/g, '');
+          if(text == 'sukses'){
             toastMixin.fire({
                 icon: 'success',
                 title: 'Data berhasih disimpan.'
@@ -198,12 +206,14 @@ function save(mode){
             });
           }
           $("#modaladd").modal('hide');
-          getData(1,ou)
+          // getData(1,ou)
         }
     })
 }
 
 function edit(el) {
+    $('.id').prop('disabled',true);
+    $('.group').prop('disabled',true);
     $('.btnSave').removeAttr('onclick');
     $('.btnSave').attr('onclick', 'save(1)');
 
@@ -211,6 +221,7 @@ function edit(el) {
 
     let $btn = $(el);
 
+    let dn       = $btn.data("dn");
     let id       = $btn.data("id");
     let nama     = $btn.data("nama");
     let nik    = $btn.data("nik");
@@ -222,9 +233,11 @@ function edit(el) {
     let status    = $btn.data("status");
     let ket    = $btn.data("ket");
     let ou    = $btn.data("ou");
+    const ouDn = dn.split(',').map(s => s.trim()).find(s => s.startsWith('ou='))?.slice(3) || '';
+    let email    = $btn.data("email");
 
     // Isi ke form edit
-    $(".idLama").val(id);
+    $(".dn").val(dn);
     $(".id").val(id);
     $(".nama").val(nama);
     $(".nik").val(nik);
@@ -235,7 +248,9 @@ function edit(el) {
     $(".nikakhir").val(nikakhir);
     $(".statuss").val(status);
     $(".ket").val(ket);
-    $(".group").val(ou);
+    $(".akses").val(ou);
+    $(".group").val(ouDn);
+    $(".email").val(email);
 
     $('.password').val('')
     $('.modal-title').text('Ubah User')
@@ -243,11 +258,14 @@ function edit(el) {
 }
 
 function tambah(){
+  $('.id').prop('disabled',false);
+  $('.group').prop('disabled',false);
   $('.btnSave').removeAttr('onclick');
   $('.btnSave').attr('onclick', 'save(2)');
 
   $('.alertP').addClass('d-none')
 
+  $(".dn").val("");
   $(".id").val("");
   $(".nama").val("");
   $(".nik").val("");
@@ -259,6 +277,8 @@ function tambah(){
   $(".statuss").val("");
   $(".ket").val("");
   $(".group").val("");
+  $(".akses").val("");
+  $(".email").val("");
   $('.password').val('')
   $('.modal-title').text('Tambah User')
 }

@@ -19,9 +19,20 @@
 					</div>
 				</div>
 				<div class="col-lg-3 mb-3 row">
+					<label class="col-3 col-form-label">Akses</label>
+					<div class="col">
+						<select class="form-select filterAkses">
+							<option value="">Pilih..</option>
+							<option value="jkt">Jakarta</option>
+							<option value="sda">Sidoharjo</option>
+							<option value="all">All</option>
+						</select>
+					</div>
+				</div>
+				<div class="col-lg-3 mb-3 row">
 					<label class="col-3 col-form-label">Nama</label>
 					<div class="col">
-						<input type="text" class="form-control filterNama" placeholder="Input Nama">
+						<input type="text" class="form-control filterNama" placeholder="Nama">
 					</div>
 				</div>
 			</div>
@@ -57,7 +68,7 @@
 								<th style="width:5%">Nik Awal</th>
 								<th style="width:5%">Nik Akhir</th> -->
 								<th>Status</th>
-								<th>Ket</th>
+								<th>Email</th>
 								<th><i class="fa fa-gears"></i></th>
 							</tr>
 						</thead>
@@ -82,19 +93,29 @@
 			</div>
 			<div class="modal-body">
 				<div class="row row-cards">
-					<div class="col-md-8">
+					<input type="hidden" class="form-control dn" disabled>
+					<div class="col-md-4">
 						<div class="mb-1">
 							<label class="form-label">ID</label>
-							<input type="text" class="form-control id" placeholder="ID">
+							<input type="text" class="form-control id" placeholder="ID" disabled>
 						</div>
 					</div>
-					<div class="col-md-4 colGroup">
+					<div class="col-md-4">
 						<div class="mb-1">
-							<label class="form-label">Group</label>
-							<select class="form-control form-select group">
-								<option value="">Pilih..</option>
+							<label class="form-label">Ou</label>
+							<select class="form-control form-select group" disabled>
 								<option value="jkt">Jakarta</option>
 								<option value="sda">Sidoharjo</option>
+							</select>
+						</div>
+					</div>
+					<div class="col-md-4">
+						<div class="mb-1">
+							<label class="form-label">Akses</label>
+							<select class="form-control form-select akses">>
+								<option value="jkt">Jakarta</option>
+								<option value="sda">Sidoharjo</option>
+								<option value="all">All</option>
 							</select>
 						</div>
 					</div>
@@ -107,7 +128,7 @@
 					<div class="col-sm-5 col-md-4">
 						<div class="mb-1">
 							<label class="form-label">NIK</label>
-							<input type="email" class="form-control nik" placeholder="NIK">
+							<input type="text" class="form-control nik" placeholder="NIK">
 						</div>
 					</div>
 					<div class="col-sm-6 col-md-6">
@@ -122,10 +143,16 @@
 							<input type="text" class="form-control tgllahir" placeholder="Tgl Lahir">
 						</div>
 					</div>
-					<div class="col-md-12">
+					<div class="col-sm-6 col-md-6">
 						<div class="mb-1">
 							<label class="form-label">No. KTP</label>
 							<input type="text" class="form-control ktp" placeholder="No. KTP">
+						</div>
+					</div>
+					<div class="col-sm-6 col-md-6">
+						<div class="mb-1">
+							<label class="form-label">Email</label>
+							<input type="email" class="form-control email" placeholder="Email">
 						</div>
 					</div>
 					<div class="col-sm-6 col-md-4">
@@ -144,7 +171,6 @@
 						<div class="mb-1">
 							<label class="form-label">Status</label>
 							<select class="form-control form-select statuss">
-								<option value="">Pilih..</option>
 								<option value="aktif">Aktif</option>
 								<option value="nonaktif">Non Aktif</option>
 							</select>

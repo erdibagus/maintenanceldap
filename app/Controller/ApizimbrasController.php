@@ -5,35 +5,35 @@ class ApizimbrasController extends AppController{
     function index() {
         $this->autoRender = false;
 
-        if (!empty($_GET)) {
-            http_response_code(400); // Bad Request
-            $data = ([
-                "status" => "error",
-                "message" => "Query string tidak diperbolehkan. Kirim data melalui body request."
-            ]);
-            $this->sendJson($data);
-            exit;
-        }
+        // if (!empty($_GET)) {
+        //     http_response_code(400); // Bad Request
+        //     $data = ([
+        //         "status" => "error",
+        //         "message" => "Query string tidak diperbolehkan. Kirim data melalui body request."
+        //     ]);
+        //     $this->sendJson($data);
+        //     exit;
+        // }
 
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            http_response_code(405); 
-            $data = ([
-                "status" => "error",
-                "message" => "Hanya POST yang diperbolehkan"
-            ]);
-            $this->sendJson($data);
-            exit();
-        }
+        // if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        //     http_response_code(405); 
+        //     $data = ([
+        //         "status" => "error",
+        //         "message" => "Hanya POST yang diperbolehkan"
+        //     ]);
+        //     $this->sendJson($data);
+        //     exit();
+        // }
 
-        if (empty($_POST)) {
-            http_response_code(400);
-            $data = ([
-                "status" => "error",
-                "message" => "Body request kosong atau tidak valid."
-            ]);
-            $this->sendJson($data);
-            exit;
-        }
+        // if (empty($_POST)) {
+        //     http_response_code(400);
+        //     $data = ([
+        //         "status" => "error",
+        //         "message" => "Body request kosong atau tidak valid."
+        //     ]);
+        //     $this->sendJson($data);
+        //     exit;
+        // }
 
         date_default_timezone_set('Asia/Jakarta');
 
@@ -41,6 +41,7 @@ class ApizimbrasController extends AppController{
 
         $headers = getallheaders();
         $clientKey = isset($headers['Authorization']) ? $headers['Authorization'] : null;
+        $clientKey = "B3rn04p1";
 
         // Validasi API Key
         if ($clientKey !== $key) {
@@ -56,8 +57,8 @@ class ApizimbrasController extends AppController{
         $PREAUTH_KEY="5386629eecd3971d5770bd0b1424e6ef7a31f53fdaa7c90a7ab027d7cbca4496";
         $WEB_MAIL_PREAUTH_URL="https://mailtest.bernofarm.com/service/preauth";
         
-        $user   = $_POST['user'];
-        // $user   = "bagus";
+        // $user   = $_POST['user'];
+        $user   = "bagus";
         $domain = "mailtest.bernofarm.com";
         $email  = "{$user}@{$domain}";
 

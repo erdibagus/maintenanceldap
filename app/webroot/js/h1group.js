@@ -4,7 +4,7 @@ function getData(){
         url:"groups/getData",
         type:"POST",
         success:function(result){
-          console.log(result)
+          // console.log(result)
             result = JSON.parse(result)
             // console.log(result)
             if (result.count > 0) {
