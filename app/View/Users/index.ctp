@@ -48,7 +48,7 @@
 			<div class="card-header card-header-light">
 				<div><i class="fa fa-th-list fa-fw"></i> List Data</div>
 				<div class="card-actions">
-					<button class="btn btn-6 btn-primary" data-bs-toggle="modal" data-bs-target="#modaladd" onclick="tambah()">
+					<button class="btn btn-6 btn-primary btnAdd" data-bs-toggle="modal" data-bs-target="#modaladd" onclick="tambah()">
 					ADD
 					</button>
 				</div>
@@ -182,6 +182,16 @@
 							<textarea rows="5" class="form-control ket" placeholder="Keterangan"></textarea>
 						</div>
 					</div>
+					<div class="col-md-12">
+						<div class="mb-1">
+							<label class="form-label">Email Perusahaan</label>
+							<div class="bernoMail">
+								
+							</div>
+							<button class="btn btn-6 btn-success mb-1" id="btnTambah">+</button>
+						</div>
+					</div>
+
 					<div class="col-md-12 alertP">
 						<div class="alert alert-warning" role="alert">
 							<div class="d-flex">

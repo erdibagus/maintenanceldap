@@ -63,7 +63,7 @@ class LoginsController extends AppController{
 
         if (@ldap_bind($ldap_conn, $bind_dn, $bind_password)) {
             $filter     = "(objectClass=*)";
-            $attributes = ["uid","cn","departmentnumber","employeenumber","firstnik","lastnik","birthdate","employeetype","pwdchangedtime"];
+            $attributes = ["uid","cn","departmentnumber","employeenumber","firstnik","lastnik","birthdate","employeetype","pwdchangedtime","bernoMail"];
 
             $result = @ldap_read($ldap_conn, $bind_dn, $filter, $attributes);
 
@@ -241,8 +241,18 @@ class LoginsController extends AppController{
             }
         }
 
+        if (isset($entry["bernomail"])) {
+            $emails = array_filter(
+                $entry["bernomail"],
+                fn($v) => $v !== "count" && !is_int($v)
+            );
+
+            $result["bernoMail"] = array_values($emails); 
+        }
+
         return $result;
     }
+
 
     private function hitungExpired($pwdChangedTime, $pwdMaxAge = 15552000) {
         // Konversi pwdChangedTime ke DateTime

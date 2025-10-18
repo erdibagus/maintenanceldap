@@ -1,4 +1,5 @@
 let tableData
+
 $(document).ready(function(){
     getGroup()
     $(".tgllahir").datepicker({
@@ -8,7 +9,20 @@ $(document).ready(function(){
         maxDate: 0,
         yearRange: "1975:+0"
     });
+    $('#btnTambah').on('click', function() {
+      const baru = `
+        <div class="input-group mb-1">
+          <input type="text" class="form-control" placeholder="Email baru">
+          <button class="btn btn-danger btnHapus" type="button">
+            -
+          </button>
+        </div>`;
+      $('.bernoMail').append(baru);
+    });
 })
+$(document).on('click', '.btnHapus', function() {
+    $(this).closest('.input-group').remove();
+  });
 function getGroup(){
   $.ajax({
         url:"groups/getData",
@@ -55,7 +69,7 @@ function getData(mode,ouSave){
         success:function(result){
             // console.log(result)
             result = JSON.parse(result)
-            // console.log(result)
+            console.log(result)
             if (result.count > 0) {
                 // console.log(result.count === 1 && !(result[0]?.uid?.[0] ?? ""))
                 if (result.count === 1 && !(result[0]?.uid?.[0] ?? "")){
@@ -77,6 +91,16 @@ function getData(mode,ouSave){
                     // format ke d-m-y
                     let tgllahir = `${day}/${month}/${year}`;
 
+                    //bernoMail
+                    const bernoMail = result[i].bernomail
+                    // console.log(bernoMail)
+                    let arrMail = [];
+                    for (let key in bernoMail) {
+                      if (key !== "count") { 
+                        arrMail.push(bernoMail[key]);
+                      }
+                    }
+
                     rows += "<tr>";
                     rows += "<td>" + n + ".</td>";
                     rows += "<td>" + (result[i]?.uid?.[0] ?? "") + "</td>";
@@ -90,8 +114,8 @@ function getData(mode,ouSave){
                     rows += "<td>" + (result[i]?.employeetype?.[0] ?? "") + "</td>";
                     rows += "<td>" + (result[i]?.mail?.[0] ?? "") + "</td>";
                     rows += `<td><button data-dn='${result[i]?.dn ?? ""}' data-email='${result[i]?.mail?.[0] ?? ""}' data-ou='${result[i]?.ou?.[0] ?? ""}' data-id='${result[i]?.uid?.[0] ?? ""}' data-nama='${result[i]?.cn?.[0] ?? ""}' data-nik='${result[i]?.employeenumber?.[0] ?? ""}' data-divisi='${result[i]?.departmentnumber?.[0] ?? ""}'
-                                 data-tgllahir='${tgllahir}' data-ktp='${result[i]?.noktp?.[0] ?? ""}' data-nikawal='${result[i]?.firstnik?.[0] ?? ""}' data-nikakhir='${result[i]?.lastnik?.[0] ?? ""}' data-ket='${result[i]?.description?.[0] ?? ""}' data-status='${result[i]?.employeetype?.[0] ?? ""}' onclick='edit(this)' class='btn btn-1'><i class='fa fa-edit'></i></button>
-                                <button class='btn btn-1' onclick='btnHapus("${result[i]?.cn?.[0] ?? ""}","${result[i]?.dn ?? ""}")'><i class='fa fa-trash'></i></button>
+                                 data-tgllahir='${tgllahir}' data-ktp='${result[i]?.noktp?.[0] ?? ""}' data-nikawal='${result[i]?.firstnik?.[0] ?? ""}' data-nikakhir='${result[i]?.lastnik?.[0] ?? ""}' data-ket='${result[i]?.description?.[0] ?? ""}' data-status='${result[i]?.employeetype?.[0] ?? ""}' data-bernoMail='${arrMail.join(',')}' onclick='edit(this)' class='btn'><i class='fa fa-edit'></i></button>
+                                <button class='btn btn-outline-danger' onclick='btnHapus("${result[i]?.cn?.[0] ?? ""}","${result[i]?.dn ?? ""}")'><i class='fa fa-trash'></i></button>
                               </td>`;
                     rows += "</tr>";
                     n++
@@ -206,7 +230,7 @@ function save(mode){
             });
           }
           $("#modaladd").modal('hide');
-          // getData(1,ou)
+          getData(1,ou)
         }
     })
 }
@@ -218,6 +242,8 @@ function edit(el) {
     $('.btnSave').attr('onclick', 'save(1)');
 
     $('.alertP').removeClass('d-none')
+
+    $('.bernoMail').html('');
 
     let $btn = $(el);
 
@@ -235,6 +261,7 @@ function edit(el) {
     let ou    = $btn.data("ou");
     const ouDn = dn.split(',').map(s => s.trim()).find(s => s.startsWith('ou='))?.slice(3) || '';
     let email    = $btn.data("email");
+    let bernoMail    = $btn.data("bernomail");
 
     // Isi ke form edit
     $(".dn").val(dn);
@@ -251,6 +278,23 @@ function edit(el) {
     $(".akses").val(ou);
     $(".group").val(ouDn);
     $(".email").val(email);
+
+    //bernoMail
+    // console.log(bernoMail);return
+    if(bernoMail){
+        const arrMail = bernoMail.split(',')
+        let txtMail = ""
+        arrMail.forEach(item => {
+            txtMail += `<div class="input-group mb-1">
+                        <input type="text" disabled class="form-control" value="${item}">
+                        <button class="btn btn-danger btnHapus" type="button">
+                          -
+                        </button>
+                      </div>`
+        });
+
+        $(".bernoMail").html(txtMail)
+    }
 
     $('.password').val('')
     $('.modal-title').text('Ubah User')
@@ -280,6 +324,8 @@ function tambah(){
   $(".akses").val("");
   $(".email").val("");
   $('.password').val('')
+  $('.bernoMail').html('');
+
   $('.modal-title').text('Tambah User')
 }
 
@@ -291,12 +337,12 @@ function initDtDetail() {
             { targets: 0, width: "3%", className: "text-center" }, // No.
             { targets: 1, width: "10%", className: "text-center" },  // ID
             { targets: 2, width: "20%", className: "text-left" },  // Nama
-            { targets: 3, width: "10%", className: "text-center" },  // NIK
+            { targets: 3, width: "5%", className: "text-center" },  // NIK
             { targets: 4, width: "10%", className: "text-center" },  // Divisi
             { targets: 5, width: "10%", className: "text-center" },// Tgl Lahir
             { targets: 6, width: "5%", className: "text-center" }, // Status
             { targets: 7, width: "20%", className: "text-left" },  // Ket
-            { targets: 8, width: "12%", className: "text-center"}  // Action
+            { targets: 8, width: "17%", className: "text-center"}  // Action
         ],
         drawCallback: function(settings) {
             let api = this.api();
@@ -330,5 +376,3 @@ function dateLDAP(tgl){
 
   return `${YYYY}${MM}${DD}${HH}${min}${SS}Z`;
 }
-
-
