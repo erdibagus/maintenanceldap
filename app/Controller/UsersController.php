@@ -170,6 +170,7 @@ class UsersController extends AppController{
 
             $addMail = $_POST['addMail'] ?? [];
             $delMail = $_POST['delMail'] ?? [];
+            $newPass = $_POST['password'] ?? '';
 
             $response = [
                 "status" => "success",
@@ -188,6 +189,10 @@ class UsersController extends AppController{
 
             if (!empty($delMail)) {
                 $response["detail"]["delMail"] = $this->modMail($conn, $dn, $delMail, 'del');
+            }
+
+            if (!empty($newPass)) {
+                $response["detail"]["passwordChange"] = $this->ubahPassword($conn, $dn, $newPass);
             }
 
             $this->sendJson($response);
@@ -227,6 +232,37 @@ class UsersController extends AppController{
         header('Content-Type: application/json');
         echo json_encode($data, JSON_PRETTY_PRINT);
     }
+
+    private function ubahPassword($conn, $dn, $newPassword) {
+        $result = [
+            "dn"      => $dn,
+            "status"  => "failed",
+            "message" => "",
+            "error"   => null
+        ];
+
+        try {
+            if (empty($dn) || empty($newPassword)) {
+                throw new Exception("DN dan password baru wajib diisi.");
+            }
+
+            $entry = ["userPassword" => $newPassword];
+
+            if (!@ldap_mod_replace($conn, $dn, $entry)) {
+                throw new Exception("Gagal ubah password: " . ldap_error($conn));
+            }
+
+            $result["status"]  = "success";
+            $result["message"] = "Password berhasil diperbarui.";
+
+        } catch (Exception $e) {
+            $result["error"]   = $e->getMessage();
+            $result["message"] = "Terjadi kesalahan saat ubah password.";
+        }
+
+        return $result;
+    }
+
 
     public function ubahUid($uidLama, $uidBaru, $ouLama, $ouBaru) {
         $this->autoRender = false;
