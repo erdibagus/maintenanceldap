@@ -210,6 +210,8 @@ function save(mode){
 
   delMail = listMail.filter(item => !formMail.includes(item))
 
+  console.log(addMail,delMail);return
+
   $.ajax({
         url:url,
         type:"POST",
@@ -328,6 +330,8 @@ function tambah(){
   $('.btnSave').attr('onclick', 'save(2)');
 
   $('.alertP').addClass('d-none')
+
+  listMail = []
 
   $(".dn").val("");
   $(".id").val("");

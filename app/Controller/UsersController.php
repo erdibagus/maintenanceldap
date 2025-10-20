@@ -88,15 +88,18 @@ class UsersController extends AppController{
     public function tambah() {
         $this->autoRender = false;
 
-        // var_dump($_POST);exit();
-
         try {
             $conn = $this->Function->ldapConnect(true);
-            $dn = "uid={$_POST['id']},ou={$_POST['ou']}," . $this->Function->ldapConfig['base_dn'];
 
-            $entry = [
+            $id   = $_POST['id'] ?? '';
+            $ou   = $_POST['ou'] ?? '';
+            $base = $this->Function->ldapConfig['base_dn'];
+            $dn   = "uid={$id},ou={$ou},{$base}";
+
+            // Filter nilai kosong agar tidak dikirim ke LDAP
+            $entry = array_filter([
                 "objectClass"      => ["inetOrgPerson", "bernofarmPerson"],
-                "uid"              => $_POST['id'] ?? '',
+                "uid"              => $id,
                 "sn"               => $_POST['sn'] ?? '-',
                 "cn"               => $_POST['nama'] ?? '',
                 "description"      => $_POST['ket'] ?? '',
@@ -110,16 +113,35 @@ class UsersController extends AppController{
                 "mail"             => $_POST['email'] ?? '',
                 "ou"               => $_POST['akses'] ?? '',
                 "userPassword"     => $_POST['password'] ?? 'user123'
-            ];
-            if (@ldap_add($conn, $dn, $entry)) {
-                echo "sukses";
-            } else {
-                echo "gagal: " . ldap_error($conn);
+            ], fn($v) => $v !== '' && $v !== null);
+
+            // Tambahkan akun baru
+            if (!@ldap_add($conn, $dn, $entry)) {
+                throw new Exception("Gagal tambah data: " . ldap_error($conn));
             }
+
+            // Jika ada bernoMail tambahan
+            $addMail = $_POST['addMail'] ?? [];
+            $detail = [];
+
+            if (!empty($addMail)) {
+                $detail['addMail'] = $this->modMail($conn, $dn, $addMail, 'add');
+            }
+
+            $this->sendJson([
+                "status"  => "success",
+                "message" => "Data berhasil ditambahkan.",
+                "dn"      => $dn,
+                "detail"  => $detail
+            ]);
+
         } catch (Exception $e) {
-            echo $e->getMessage();
+            $this->sendJson([
+                "status"  => "error",
+                "message" => $e->getMessage()
+            ], 500);
         } finally {
-            $this->Function->ldapDisconnect($conn);
+            if (!empty($conn)) $this->Function->ldapDisconnect($conn);
         }
     }
 
