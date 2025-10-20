@@ -1,4 +1,4 @@
-let tableData
+let tableData, listMail = []
 
 $(document).ready(function(){
     getGroup()
@@ -22,7 +22,7 @@ $(document).ready(function(){
 })
 $(document).on('click', '.btnHapus', function() {
     $(this).closest('.input-group').remove();
-  });
+});
 function getGroup(){
   $.ajax({
         url:"groups/getData",
@@ -69,7 +69,7 @@ function getData(mode,ouSave){
         success:function(result){
             // console.log(result)
             result = JSON.parse(result)
-            console.log(result)
+            // console.log(result)
             if (result.count > 0) {
                 // console.log(result.count === 1 && !(result[0]?.uid?.[0] ?? ""))
                 if (result.count === 1 && !(result[0]?.uid?.[0] ?? "")){
@@ -195,6 +195,21 @@ function save(mode){
   const url = mode === 1 ? "users/ubah" : "users/tambah";
   const tgl = dateLDAP(tgllahir)
 
+  let formMail = [], addMail = [], delMail = []
+
+  $('.bernoMail input.form-control').each(function() {
+      const val = $(this).val().trim();
+      if (val !== '') {
+          formMail.push(val);
+      }
+  });
+
+  // console.log(listMail);return
+
+  addMail = formMail.filter(item => !listMail.includes(item))
+
+  delMail = listMail.filter(item => !formMail.includes(item))
+
   $.ajax({
         url:url,
         type:"POST",
@@ -213,12 +228,14 @@ function save(mode){
               ou:ou,
               akses:akses,
               email:email,
-              password: pass
+              password: pass,
+              addMail: addMail,
+              delMail: delMail
             }),
         success:function(result){
-          // console.log(result);return
-          const text = result.replace(/\s+/g, '');
-          if(text == 'sukses'){
+          // console.log(JSON.parse(result));
+          const text = JSON.parse(result);
+          if(text.status == 'success'){
             toastMixin.fire({
                 icon: 'success',
                 title: 'Data berhasih disimpan.'
@@ -244,6 +261,8 @@ function edit(el) {
     $('.alertP').removeClass('d-none')
 
     $('.bernoMail').html('');
+
+    listMail = []
 
     let $btn = $(el);
 
@@ -283,6 +302,7 @@ function edit(el) {
     // console.log(bernoMail);return
     if(bernoMail){
         const arrMail = bernoMail.split(',')
+        listMail = arrMail
         let txtMail = ""
         arrMail.forEach(item => {
             txtMail += `<div class="input-group mb-1">

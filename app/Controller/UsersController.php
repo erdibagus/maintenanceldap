@@ -126,13 +126,11 @@ class UsersController extends AppController{
     public function ubah() {
         $this->autoRender = false;
 
-        // var_dump($_POST);exit();
-
         try {
             $conn = $this->Function->ldapConnect(true);
-            $dn = $_POST['dn'];
-            
-            $entry = [
+            $dn   = $_POST['dn'] ?? '';
+
+            $entry = array_filter([
                 "uid"              => $_POST['id'] ?? '',
                 "sn"               => $_POST['sn'] ?? '-',
                 "cn"               => $_POST['nama'] ?? '',
@@ -146,19 +144,66 @@ class UsersController extends AppController{
                 "birthDate"        => $_POST['tgllahir'] ?? '',
                 "ou"               => $_POST['akses'] ?? '',
                 "mail"             => $_POST['email'] ?? '',
-                
+            ], fn($v) => $v !== '' && $v !== null);
+
+            $addMail = $_POST['addMail'] ?? [];
+            $delMail = $_POST['delMail'] ?? [];
+
+            $response = [
+                "status" => "success",
+                "message" => "Perubahan berhasil.",
+                "detail" => []
             ];
 
-            if (@ldap_modify($conn, $dn, $entry)) {
-                echo "sukses";
-            } else {
-                echo "gagal: " . ldap_error($conn);
+            if (!@ldap_modify($conn, $dn, $entry)) {
+                throw new Exception("Gagal ubah data: " . ldap_error($conn));
             }
+
+            // Tambah / hapus mail (jika ada)
+            if (!empty($addMail)) {
+                $response["detail"]["addMail"] = $this->modMail($conn, $dn, $addMail, 'add');
+            }
+
+            if (!empty($delMail)) {
+                $response["detail"]["delMail"] = $this->modMail($conn, $dn, $delMail, 'del');
+            }
+
+            $this->sendJson($response);
+
         } catch (Exception $e) {
-            echo $e->getMessage();
+            $this->sendJson([
+                "status"  => "error",
+                "message" => $e->getMessage()
+            ], 500);
         } finally {
-            $this->Function->ldapDisconnect($conn);
+            if (!empty($conn)) $this->Function->ldapDisconnect($conn);
         }
+    }
+
+    private function modMail($conn, $dn, $mails, $mode = 'add') {
+        $results = [];
+
+        foreach ($mails as $email) {
+            $attr = ["bernoMail" => $email];
+            $ok = ($mode === 'add')
+                ? @ldap_mod_add($conn, $dn, $attr)
+                : @ldap_mod_del($conn, $dn, $attr);
+
+            $results[] = [
+                "email"  => $email,
+                "status" => $ok ? "success" : "failed",
+                "action" => $mode,
+                "error"  => $ok ? null : ldap_error($conn)
+            ];
+        }
+
+        return $results;
+    }
+
+    private function sendJson($data, $statusCode = 200) {
+        http_response_code($statusCode);
+        header('Content-Type: application/json');
+        echo json_encode($data, JSON_PRETTY_PRINT);
     }
 
     public function ubahUid($uidLama, $uidBaru, $ouLama, $ouBaru) {
