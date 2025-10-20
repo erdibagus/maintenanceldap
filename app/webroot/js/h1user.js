@@ -235,7 +235,7 @@ function save(mode){
               delMail: delMail
             }),
         success:function(result){
-          console.log(result)
+          // console.log(result)
           // console.log(JSON.parse(result));
           const text = JSON.parse(result);
           if(text.status == 'success'){
