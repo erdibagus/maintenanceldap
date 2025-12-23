@@ -129,7 +129,7 @@ class UbahpasswordsController extends AppController{
                 $this->sendJson($response);
                 return;
             }
-            $user_dn = "uid={$username},ou={$ou}," . $this->Function->ldapConfig['base_dn'];
+            $user_dn = "uid={$user},ou={$ou}," . $this->Function->ldapConfig['base_dn'];
 
             // 🔗 Koneksi ke LDAP
             $conn = $this->Function->ldapConnect(false);
