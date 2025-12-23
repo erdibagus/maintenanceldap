@@ -116,10 +116,18 @@ class UbahpasswordsController extends AppController{
                 throw new Exception("Password baru harus mengandung simbol (@#$%^&*?!_- dll)");
             }
 
-            // ✅ Cari OU user
-            $ou = $this->Function->cekOu($username);
+            $user = $this->Function->cekUid($username);
+            if (!$user) {
+                $response = ["status" => "error", "message" => "User tidak ditemukan"];
+                $this->sendJson($response);
+                return;
+            }
+
+            $ou = $this->Function->cekOu($user);
             if (!$ou) {
-                throw new Exception("User tidak ditemukan.");
+                $response = ["status" => "error", "message" => "User tidak ditemukan"];
+                $this->sendJson($response);
+                return;
             }
             $user_dn = "uid={$username},ou={$ou}," . $this->Function->ldapConfig['base_dn'];
 
