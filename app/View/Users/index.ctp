@@ -49,7 +49,7 @@
 				<div><i class="fa fa-th-list fa-fw"></i> List Data</div>
 				<div class="card-actions">
 					<button class="btn btn-6 btn-primary btnAdd" data-bs-toggle="modal" data-bs-target="#modaladd" onclick="tambah()">
-					Add
+					Tambah
 					</button>
 				</div>
 			</div>
