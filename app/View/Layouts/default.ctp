@@ -22,6 +22,8 @@
     $versi = file_exists($path) ? filemtime($path) : time();
     echo $this->Html->script("function.js?v=$versi");
 ?>
+<script src="https://unpkg.com/htmx.org@1.9.10"></script>
+
 </head>
 <body>
 	<div id="loading" style="display: none">
@@ -45,7 +47,10 @@
 				<div class="collapse navbar-collapse" id="sidebar-menu">
 					<ul class="navbar-nav pt-lg-3">
 						<li class="nav-item">
-							<a class="nav-link" href="#" >
+							<a class="nav-link"
+								hx-get="./homes"
+								hx-target="#main-content"
+								hx-push-url="true">
 								<span class="nav-link-icon d-md-none d-lg-inline-block">
 									<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-1"><path d="M5 12l-2 0l9 -9l9 9l-2 0" /><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" /><path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" /></svg>
 								</span>
@@ -55,7 +60,10 @@
 							</a>
 						</li>
 						<li class="nav-item">
-							<a class="nav-link" href="./groups">
+							<a class="nav-link"
+								hx-get="./groups"
+								hx-target="#main-content"
+								hx-push-url="true">
 								<span class="nav-link-icon d-md-none d-lg-inline-block">
 									<svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-buildings"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 21v-15c0 -1 1 -2 2 -2h5c1 0 2 1 2 2v15" /><path d="M16 8h2c1 0 2 1 2 2v11" /><path d="M3 21h18" /><path d="M10 12v0" /><path d="M10 16v0" /><path d="M10 8v0" /><path d="M7 12v0" /><path d="M7 16v0" /><path d="M7 8v0" /><path d="M17 12v0" /><path d="M17 16v0" /></svg>
 								</span>
@@ -64,18 +72,11 @@
 								</span>
 							</a>
 						</li>
-						<!-- <li class="nav-item">
-							<a class="nav-link" href="#">
-								<span class="nav-link-icon d-md-none d-lg-inline-block">
-									<svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-link"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 15l6 -6" /><path d="M11 6l.463 -.536a5 5 0 0 1 7.071 7.072l-.534 .464" /><path d="M13 18l-.397 .534a5.068 5.068 0 0 1 -7.127 0a4.972 4.972 0 0 1 0 -7.071l.524 -.463" /></svg>
-								</span>
-								<span class="nav-link-title">
-									Link User Group
-								</span>
-							</a>
-						</li> -->
 						<li class="nav-item">
-							<a class="nav-link" href="./users">
+							<a class="nav-link"
+								hx-get="./users"
+								hx-target="#main-content"
+								hx-push-url="true">
 								<span class="nav-link-icon d-md-none d-lg-inline-block">
 									<svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-users"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 7m-4 0a4 4 0 1 0 8 0a4 4 0 1 0 -8 0" /><path d="M3 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /><path d="M21 21v-2a4 4 0 0 0 -3 -3.85" /></svg>
 								</span>
@@ -113,8 +114,10 @@
 				</div>
 			</div>
 		</header>
-	<div class="page-wrapper">
+	<div class="page-wrapper" id="main-content">
 		<?php echo $this->fetch('content'); ?>
+	</div>
+	<div class="page-wrapper">
 		<footer class="footer footer-transparent p-0 mb-2">
 			<div class="container-xl">
 				<div class="row align-items-center flex-row-reverse">
@@ -130,6 +133,7 @@
 			</div>
 		</footer>
 	</div>
+	
 			<!-- Tabler Core -->
 <script src="./dist/js/tabler.min.js" defer></script>
 </body>

@@ -3,7 +3,9 @@ class GroupsController extends AppController{
 	public $components = array('Function');
 	
 	function index(){
-
+        if ($this->request->header('HX-Request')) {
+			$this->layout = false;
+		}
 	}
 
     public function getData($filter = "(objectClass=organizationalUnit)", $attributes = ["ou"]) {
@@ -12,12 +14,15 @@ class GroupsController extends AppController{
             // koneksi LDAP pakai helper
             $conn = $this->Function->ldapConnect(true);
 
+           
+
             // lakukan pencarian
             $search = ldap_search($conn, $this->Function->ldapConfig['base_dn'], $filter, $attributes);
             if (!$search) {
                 throw new Exception("Search gagal: " . ldap_error($conn));
             }
 
+            //  var_dump($search);exit();
             // ambil hasil
             $entries = ldap_get_entries($conn, $search);
             ldap_unbind($conn);

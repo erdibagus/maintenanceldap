@@ -1,8 +1,3 @@
-<?php 
-	$path = WWW_ROOT . 'js' . DS . 'h1group.js';
-    $versi = file_exists($path) ? filemtime($path) : time();
-    echo $this->Html->script("h1group.js?v=$versi");
-?>
 <div class="page-header">
 	<div class="container-xl">
 		<h2>Data Group</h2>
@@ -67,3 +62,9 @@
 		</div>
 	</div>
 </div>
+
+<?php 
+	$path = WWW_ROOT . 'js' . DS . 'h1group.js';
+    $versi = file_exists($path) ? filemtime($path) : time();
+    echo $this->Html->script("h1group.js?v=$versi");
+?>

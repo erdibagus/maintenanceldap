@@ -9,8 +9,8 @@ class FunctionComponent extends Component{
         if ($host === 'localhost' || $host === '127.0.0.1' || $host === '192.168.0.101' ) {
             //debug
             $this->ldapConfig = [
-                'host' => 'ldap://103.123.63.108:7766',
-                'port' => null,
+                'host' => 'ldap://117.102.80.247',
+                'port' => 389,
                 'admin_dn' => 'cn=admin,dc=bernofarm,dc=com',
                 'admin_pass' => 'You4tourlah',
                 'base_dn' => 'dc=bernofarm,dc=com',
@@ -40,7 +40,8 @@ class FunctionComponent extends Component{
 
         if ($bindAsAdmin) {
             if (!@ldap_bind($conn, $this->ldapConfig['admin_dn'], $this->ldapConfig['admin_pass'])) {
-                throw new Exception("Gagal bind sebagai admin LDAP");
+                // throw new Exception("Gagal bind sebagai admin LDAP");
+                echo ldap_error($conn);
             }
         }
 

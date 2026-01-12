@@ -1,15 +1,11 @@
 <?php
 class UsersController extends AppController{
 	public $components = array('Function');
-    
-    private $ldapHost = "ldap://192.168.0.101";
-    private $ldapPort = 389;
-    private $ldapAdminDn = "cn=admin,dc=bagus,dc=local";
-    private $ldapAdminPass = "bagus";
-    private $baseDn = "dc=bagus,dc=local";
 	
 	function index(){
-		// $this->Function->cekSession($this);
+		if ($this->request->header('HX-Request')) {
+			$this->layout = false;
+		}
 	}
 
     public function getData($filter = "(objectClass=*)", $attributes = []) {

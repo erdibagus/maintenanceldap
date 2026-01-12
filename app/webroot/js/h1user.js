@@ -1,16 +1,14 @@
-let tableData, listMail = []
+getGroup()
 
-$(document).ready(function(){
-    getGroup()
-    $(".tgllahir").datepicker({
-        dateFormat: "dd/mm/yy",   
-        changeMonth: true,        
-        changeYear: true,         
-        maxDate: 0,
-        yearRange: "1975:+0"
-    });
-    $('#btnTambah').on('click', function() {
-      const baru = `
+$(".tgllahir").datepicker({
+    dateFormat: "dd/mm/yy",   
+    changeMonth: true,        
+    changeYear: true,         
+    maxDate: 0,
+    yearRange: "1975:+0"
+});
+$(document).off('click', '#btnTambah').on('click', '#btnTambah', function() {
+    const baru = `
         <div class="input-group mb-1">
           <input type="text" class="form-control" placeholder="Email baru">
           <button class="btn btn-danger btnHapus" type="button">
@@ -18,9 +16,8 @@ $(document).ready(function(){
           </button>
         </div>`;
       $('.bernoMail').append(baru);
-    });
-})
-$(document).on('click', '.btnHapus', function() {
+});
+$(document).off('click', '.btnHapus').on('click', '.btnHapus', function() {
     $(this).closest('.input-group').remove();
 });
 function getGroup(){
