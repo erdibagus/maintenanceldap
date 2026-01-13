@@ -18,12 +18,14 @@ class LoginsController extends AppController{
         $user = $_POST['username'] ?? '';
         $pass = $_POST['password'] ?? '';
 
-        $host = $_SERVER['HTTP_HOST'];
-        if ($host === 'localhost' || $host === '127.0.0.1' || $host === '192.168.0.101' ) {
-            $ldap_host = "ldap://103.123.63.108:7766";
-        }else{
-            $ldap_host = "ldap://localhost:7766";
-        }
+        // $host = $_SERVER['HTTP_HOST'];
+        // if ($host === 'localhost' || $host === '127.0.0.1' || $host === '192.168.0.101' ) {
+        //     $ldap_host = "ldap://117.102.80.247:7766";
+        // }else{
+        //     $ldap_host = "ldap://localhost";
+        // }
+
+        $ldap_host = "ldap://localhost";
          
         $ldap_port = null;
 

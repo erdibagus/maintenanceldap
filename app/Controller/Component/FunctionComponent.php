@@ -19,7 +19,7 @@ class FunctionComponent extends Component{
         } else {
             //prod
             $this->ldapConfig = [
-                'host' => 'ldap://1.1.1.94',
+                'host' => 'ldap://localhost',
                 'port' => 389,
                 'admin_dn' => 'cn=admin,dc=bernofarm,dc=com',
                 'admin_pass' => 'You4tourlah',
