@@ -4,13 +4,14 @@ function getData(){
         url:"groups/getData",
         type:"POST",
         success:function(result){
-          console.log(result)
+          // console.log(result)
             result = JSON.parse(result)
             // console.log(result)
             if (result.count > 0) {
               let rows = "";
 
               for (let i = 0; i < result.count; i++) {
+                  if (result[i]?.ou?.[0] === 'policies') continue
                   rows += "<tr>";
                   rows += "<td>" + (result[i]?.dn ?? "") + "</td>";
                   rows += "<td>" + (result[i]?.ou?.[0] ?? "") + "</td>";

@@ -116,6 +116,11 @@ class UsersController extends AppController{
                 throw new Exception("Gagal tambah data: " . ldap_error($conn));
             }
 
+            $resetAttr = ["pwdReset" => "TRUE"];
+            if (!@ldap_mod_add($conn, $dn, $resetAttr)) {
+                // Opsional: log jika gagal
+            }
+
             // Jika ada bernoMail tambahan
             $addMail = $_POST['addMail'] ?? [];
             $detail = [];
@@ -242,7 +247,10 @@ class UsersController extends AppController{
                 throw new Exception("DN dan password baru wajib diisi.");
             }
 
-            $entry = ["userPassword" => $newPassword];
+            $entry = [
+                "userPassword" => $newPassword,
+                "pwdReset"     => "TRUE"
+            ];
 
             if (!@ldap_mod_replace($conn, $dn, $entry)) {
                 throw new Exception("Gagal ubah password: " . ldap_error($conn));

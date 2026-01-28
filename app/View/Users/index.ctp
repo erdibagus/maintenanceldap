@@ -6,14 +6,14 @@
 				<div><i class="fa fa-search fa-fw"></i> Filter</div>
 			</div>
 			<div class="card-body">
-				<div class="col-lg-3 mb-3 row">
+				<div class="col-lg-3 col-md-6 mb-3 row">
 					<label class="col-3 col-form-label">OU</label>
 					<div class="col">
 						<select class="form-select ou">
 						</select>
 					</div>
 				</div>
-				<div class="col-lg-3 mb-3 row">
+				<div class="col-lg-3 col-md-6 mb-3 row">
 					<label class="col-3 col-form-label">Akses</label>
 					<div class="col">
 						<select class="form-select filterAkses">
@@ -24,7 +24,7 @@
 						</select>
 					</div>
 				</div>
-				<div class="col-lg-3 mb-3 row">
+				<div class="col-lg-3 col-md-6 mb-3 row">
 					<label class="col-3 col-form-label">Nama</label>
 					<div class="col">
 						<input type="text" class="form-control filterNama" placeholder="Nama">
@@ -205,7 +205,7 @@
 							<div class="col">
 								<input type="text" class="form-control password" placeholder="Password">
 								<small class="form-hint">
-									Your password must be 8-20 characters long, contain letters and numbers, and must not contain
+									Password must be 8-20 characters long, contain letters and numbers, and must not contain
 									spaces, special characters, or emoji.
 								</small>
 							</div>
