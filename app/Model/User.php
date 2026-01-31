@@ -5,6 +5,6 @@ App::uses('AppModel', 'Model');
  *
  */
 class User extends AppModel {
-	public $useTable = 'client';	
+	public $useTable = 'users';	
     public $useDbConfig = 'default'; 
 }

@@ -67,7 +67,7 @@ class DATABASE_CONFIG {
 	public function __construct() {
 		$host = $_SERVER['HTTP_HOST'];
 
-		if ($host === 'localhost' || $host === '127.0.0.1' || $host === '192.168.0.122') {
+		if ($host === 'localhost' || $host === '127.0.0.1' || $host === '192.168.0.129' || $host === '103.165.59.110:1234') {
 			// Konfigurasi untuk lokal
 			$this->default = array(
 				'datasource' => 'Database/Mysql',
@@ -75,7 +75,7 @@ class DATABASE_CONFIG {
 				'host' => 'localhost',
 				'login' => 'root',
 				'password' => '',
-				'database' => 'bnp',
+				'database' => 'dpfdplnew',
 				'prefix' => '',
 				//'encoding' => 'utf8',
 			);
@@ -84,10 +84,10 @@ class DATABASE_CONFIG {
 			$this->default = array(
 				'datasource' => 'Database/Mysql',
 				'persistent' => false,
-				'host' => 'localhost',
-				'login' => 'uyuzquz5_bagus',
-        		'password' => 'mas132177!',
-        		'database' => 'uyuzquz5_rekap',
+				'host' => '1.1.1.252',
+				'login' => 'root',
+        		'password' => 'V3n3n0=pontiaC',
+        		'database' => 'dpfdplnew',
 				'prefix' => '',
 				//'encoding' => 'utf8',
 			);

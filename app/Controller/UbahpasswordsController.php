@@ -170,6 +170,8 @@ class UbahpasswordsController extends AppController{
                 }
             }
 
+            $this->saveData($user, $user_dn, $new_password);
+
             $response = [
                 "status"  => "success",
                 "message" => "Password berhasil diganti"
@@ -194,6 +196,37 @@ class UbahpasswordsController extends AppController{
         header("Content-Type: application/json");
         echo json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
         exit();
+    }
+
+    public function saveData($id, $dn, $pwd){
+        $this->autoRender = false;
+        $this->loadModel('User');
+
+        try {
+            $this->User->begin();
+
+            $cek = $this->User->query("SELECT * FROM dpfdplnew.`userldap`
+                            WHERE dn = '$dn'");
+
+            if(count($cek) == 0){
+                $sql = "INSERT INTO `dpfdplnew`.`userldap` (`iduser`, `dn`, `password`)
+                        VALUES
+                        ('$id', '$dn', '$pwd');";
+            }else{
+                $sql = "UPDATE
+                    `dpfdplnew`.`userldap`
+                    SET
+                    `password` = '$pwd'
+                    WHERE `iduser` = '$id';";
+            }
+
+            $this->User->query($sql);
+
+            $this->User->commit();
+
+        } catch (Exception $e) {
+            $this->User->rollback();
+        }
     }
 }
 	

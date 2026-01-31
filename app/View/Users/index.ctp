@@ -202,13 +202,7 @@
 					<div class="col-md-12 mt-0">
 						<div class="mb-1">
 							<label class="form-label">Password</label>
-							<div class="col">
-								<input type="text" class="form-control password" placeholder="Password">
-								<small class="form-hint">
-									Password must be 8-20 characters long, contain letters and numbers, and must not contain
-									spaces, special characters, or emoji.
-								</small>
-							</div>
+							<input type="text" class="form-control password" placeholder="Password">
 						</div>
 					</div>
 				</div>
