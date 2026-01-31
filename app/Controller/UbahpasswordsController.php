@@ -170,7 +170,9 @@ class UbahpasswordsController extends AppController{
                 }
             }
 
-            // $this->saveData($user, $user_dn, $new_password);
+            $email = $this->Function->cekEmail($user);
+
+            $this->saveData($user, $user_dn, $new_password, $email);
 
             $response = [
                 "status"  => "success",
@@ -198,7 +200,7 @@ class UbahpasswordsController extends AppController{
         exit();
     }
 
-    public function saveData($id, $dn, $pwd){
+    public function saveData($id, $dn, $pwd, $email){
         $this->autoRender = false;
         $this->loadModel('User');
 
@@ -209,9 +211,9 @@ class UbahpasswordsController extends AppController{
                             WHERE dn = '$dn'");
 
             if(count($cek) == 0){
-                $sql = "INSERT INTO `dpfdplnew`.`userldap` (`iduser`, `dn`, `password`)
+                $sql = "INSERT INTO `dpfdplnew`.`userldap` (`iduser`, `dn`, `password`, `email`)
                         VALUES
-                        ('$id', '$dn', '$pwd');";
+                        ('$id', '$dn', '$pwd', '$email');";
             }else{
                 $sql = "UPDATE
                     `dpfdplnew`.`userldap`

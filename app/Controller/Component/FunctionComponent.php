@@ -112,7 +112,36 @@ class FunctionComponent extends Component{
         }
     }
 
+    public function cekEmail($uid) {
+        $conn = null;
+        try {
+            $conn = $this->ldapConnect(true);
+            $filter = "(uid=$uid)"; 
+            $result = ldap_search($conn, $this->ldapConfig['base_dn'], $filter, ["mail"]);
+
+            if (!$result) {
+                throw new Exception("LDAP search gagal untuk user: $username");
+            }
+
+            $entries = ldap_get_entries($conn, $result);
+
+            if ($entries["count"] > 0) {
+                return $entries[0]['mail'][0];
+            }
+
+            return null;
+        } catch (Exception $e) {
+            error_log("LDAP cekOu() error [user=$username]: " . $e->getMessage());
+            return null;
+        } finally {
+            if ($conn) {
+                $this->ldapDisconnect($conn);
+            }
+        }
+    }
+
 }
+
 
 
 

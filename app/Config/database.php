@@ -67,7 +67,7 @@ class DATABASE_CONFIG {
 	public function __construct() {
 		$host = $_SERVER['HTTP_HOST'];
 
-		if ($host === 'localhost' || $host === '127.0.0.1' || $host === '192.168.0.129' || $host === '103.165.59.110:1234') {
+		if ($host === '127.0.0.1' || $host === '192.168.0.129') {
 			// Konfigurasi untuk lokal
 			$this->default = array(
 				'datasource' => 'Database/Mysql',
