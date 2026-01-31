@@ -170,7 +170,7 @@ class UbahpasswordsController extends AppController{
                 }
             }
 
-            $this->saveData($user, $user_dn, $new_password);
+            // $this->saveData($user, $user_dn, $new_password);
 
             $response = [
                 "status"  => "success",
