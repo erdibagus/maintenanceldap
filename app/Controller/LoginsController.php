@@ -6,101 +6,129 @@ class LoginsController extends AppController{
         $this->autoRender = false;
 
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            $this->sendJson([
+            http_response_code(405); 
+            header('Content-Type: application/json');
+            echo json_encode([
                 "status" => "error",
                 "message" => "Hanya POST yang diperbolehkan"
-            ], 405);
+            ]);
             exit();
         }
 
-        $username = $_POST['username'] ?? '';
-        $pass     = $_POST['password'] ?? '';
-        $conn     = null;
+        $user = $_POST['username'] ?? '';
+        $pass = $_POST['password'] ?? '';
 
-        try {
-            $user = $this->Function->cekUid($username);
-            if (!$user) {
-                throw new Exception("User tidak ditemukan");
-            }
+        $host = $_SERVER['HTTP_HOST'];
+        if ($host === 'localhost' || $host === '127.0.0.1' || $host === '192.168.0.101' || $host === '103.165.59.110:1234') {
+            $ldap_host = "ldap://117.102.80.247";
+        }else{
+            $ldap_host = "ldap://localhost";
+        }
 
-            $ou = $this->Function->cekOu($user);
-            if (!$ou) {
-                throw new Exception("User tidak ditemukan");
-            }
+        // $ldap_host = "ldap://117.102.80.247";
+         
+        $ldap_port = null;
 
-            // cek expired
-            $expiredStatus = $this->cekExpired($user, $ou, 0);
-            if ($expiredStatus === "expired") {
-                throw new Exception("Password Expired");
-            }
+        // Default response
+        $response = [
+            "status"  => "error",
+            "message" => "Terjadi kesalahan"
+        ];
 
-            $bind_dn = "uid={$user},ou={$ou}," . $this->Function->ldapConfig['base_dn'];
+        $user = $this->Function->cekUid($user);
+        if (!$user) {
+            $response = ["status" => "error", "message" => "User tidak ditemukan"];
+            $this->sendJson($response);
+            return;
+        }
 
-            $conn = $this->Function->ldapConnect(false); 
+        $ou = $this->Function->cekOu($user);
+        if (!$ou) {
+            $response = ["status" => "error", "message" => "User tidak ditemukan"];
+            $this->sendJson($response);
+            return;
+        }
 
-            // bind
-            if (!@ldap_bind($conn, $bind_dn, $pass)) {
-                // Cek apakah terkunci jika gagal login
-                $lock = $this->cekLock($user, $ou);
-                if ($lock['status'] === "locked") {
-                    $response = [
-                        "status"  => "error",
-                        "message" => "Password salah 5x, akun terkunci",
-                        "remaining_lock_seconds" => $lock['remaining']
-                    ];
-                    $this->sendJson($response);
-                    return;
-                }
-                throw new Exception("Bind gagal. Password salah.");
-            }
+        $expired = $this->cekExpired($user, $ou, 0);
+        if ($expired === "expired") {
+            $response = ["status" => "error", "message" => "Password Expired"];
+            $this->sendJson($response);
+            return;
+        }
 
-            $filter = "(objectClass=*)";
+        $bind_dn       = "uid=$user,ou=$ou,dc=bernofarm,dc=com"; 
+        $bind_password = "$pass"; 
+
+        $ldap_conn = ldap_connect($ldap_host, $ldap_port) or die("Tidak bisa connect ke LDAP");
+        ldap_set_option($ldap_conn, LDAP_OPT_PROTOCOL_VERSION, 3);
+        ldap_set_option($ldap_conn, LDAP_OPT_REFERRALS, 0);
+
+        if (@ldap_bind($ldap_conn, $bind_dn, $bind_password)) {
+            $filter     = "(objectClass=*)";
             $attributes = ["uid","cn","departmentnumber","employeenumber","firstnik","lastnik","birthdate","employeetype","pwdchangedtime","bernoMail"];
-            
-            $result = @ldap_read($conn, $bind_dn, $filter, $attributes);
+
+            $result = @ldap_read($ldap_conn, $bind_dn, $filter, $attributes);
 
             if ($result === false) {
-                $errno = ldap_errno($conn);
-                $error = ldap_error($conn);
-                if ($errno == 49 || stripos($error, "Insufficient access") !== false) {
-                    throw new Exception("Akun harus mengganti password terlebih dahulu.");
-                }
-                throw new Exception("LDAP Read Error ($errno): $error");
-            }
+                $err_no  = ldap_errno($ldap_conn);
+                $err_msg = ldap_error($ldap_conn);
 
-            $entries = ldap_get_entries($conn, $result);
-            
-            if ($entries["count"] > 0) {
-                $status = $entries[0]['employeetype'][0] ?? '';
-                
-                if ($status === "aktif") {
-                    $pwdChangedTime = $entries[0]['pwdchangedtime'][0] ?? null;
-                    $expiredInfo = $this->hitungExpired($pwdChangedTime);
-                    
+                if ($err_no == 49 || stripos($err_msg, "Insufficient access") !== false) {
                     $response = [
-                        "status"  => "success",
-                        "message" => "Login berhasil",
-                        "data"    => $this->cleanLdapEntry($entries[0]),
-                        "remaining_expired_second" => $expiredInfo["sisa_detik"]
+                        "status"  => "error",
+                        "message" => "Akun harus mengganti password terlebih dahulu sebelum bisa digunakan."
                     ];
                 } else {
-                    throw new Exception("User tidak aktif");
+                    $response = [
+                        "status"  => "error",
+                        "message" => "LDAP Error ($err_no): $err_msg"
+                    ];
                 }
             } else {
-                throw new Exception("Data user tidak ditemukan");
+                $entries = ldap_get_entries($ldap_conn, $result);
+                
+                if ($entries["count"] > 0) {
+                    $status = $entries[0]['employeetype'][0];
+                    if($status === "aktif"){
+                        $pwdChangedTime = $entries[0]['pwdchangedtime'][0];
+                        // var_dump($pwdChangedTime);exit();
+                        $expired = $this->hitungExpired($pwdChangedTime);
+                        $response = [
+                            "status"  => "success",
+                            "message" => "Login berhasil",
+                            "data"    => $this->cleanLdapEntry($entries[0]),
+                            "remaining_expired_second" => $expired["sisa_detik"]
+                        ];
+                    }else{
+                        $response = [
+                            "status"  => "error",
+                            "message" => "User tidak aktif"
+                        ]; 
+                    }
+                } else {
+                    $response = [
+                        "status"  => "error",
+                        "message" => "Data user tidak ditemukan"
+                    ];
+                }
             }
-
-        } catch (Exception $e) {
-            $response = [
-                "status"  => "error",
-                "message" => $e->getMessage()
-            ];
-        } finally {
-            // 7. Selalu putus koneksi di akhir (seperti Change Password)
-            if ($conn) {
-                $this->Function->ldapDisconnect($conn);
+        } else {
+            $lock = $this->cekLock($user, $ou);
+            if ($lock['status'] === "locked") {
+                $response = [
+                    "status"  => "error",
+                    "message" => "Password salah 5x, akun terkunci",
+                    "remaining_lock_seconds" => $lock['remaining']
+                ];
+            } else {
+                $response = [
+                    "status"  => "error",
+                    "message" => "Bind gagal. password salah."
+                ];
             }
         }
+
+        ldap_unbind($ldap_conn);
 
         $this->sendJson($response);
     }
