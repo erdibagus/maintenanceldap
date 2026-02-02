@@ -96,7 +96,6 @@ class LoginsController extends AppController{
                 "message" => $e->getMessage()
             ];
         } finally {
-            // 7. Selalu putus koneksi di akhir (seperti Change Password)
             if ($conn) {
                 $this->Function->ldapDisconnect($conn);
             }
